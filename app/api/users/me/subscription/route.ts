@@ -29,15 +29,18 @@ export async function GET(req: NextRequest) {
     let effectiveEndDate = user.subscriptionEndDate;
     let source = 'personal';
 
-    // Check if user is in a household and if the owner has Pro
+    // Check if user is in a household and if ANY member has Pro
     if (user.householdId) {
-      const household = await Household.findById(user.householdId).populate('createdBy', 'subscriptionTier subscriptionEndDate');
-      if (household) {
-        const owner = household.createdBy as any;
-        if (owner && owner.subscriptionTier === 'pro') {
-          // Inherit Pro benefits from household owner
+      const household = await Household.findById(user.householdId).populate('members', 'subscriptionTier subscriptionEndDate');
+      if (household && household.members) {
+        // Check if any household member has a Pro subscription
+        const members = household.members as any[];
+        const proMember = members.find((member: any) => member.subscriptionTier === 'pro');
+        
+        if (proMember) {
+          // Inherit Pro benefits from any Pro household member
           effectiveTier = 'pro';
-          effectiveEndDate = owner.subscriptionEndDate;
+          effectiveEndDate = proMember.subscriptionEndDate;
           source = 'household';
         }
       }
