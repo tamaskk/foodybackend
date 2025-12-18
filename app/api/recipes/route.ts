@@ -103,6 +103,8 @@ export async function GET(req: NextRequest) {
       .sort({ createdAt: -1 })
       .lean();
 
+    console.log('Recipes:', recipes);
+
     const enriched = await Promise.all(
       recipes.map(async (recipe: any) => {
         let code = recipe.code;
@@ -128,6 +130,8 @@ export async function GET(req: NextRequest) {
         };
       })
     );
+
+    console.log('Enriched recipes:', enriched);
 
     return NextResponse.json({ recipes: enriched });
   } catch (error: any) {
