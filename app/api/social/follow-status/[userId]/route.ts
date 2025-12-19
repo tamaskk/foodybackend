@@ -44,7 +44,7 @@ export async function GET(
       fromUserId: currentUserId,
       toUserId: targetUserId,
       status: { $in: ['pending', 'accepted'] },
-    }).lean();
+    }).lean() as any;
 
     if (!followRequest) {
       return NextResponse.json({
