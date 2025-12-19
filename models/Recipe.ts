@@ -13,6 +13,7 @@ export interface IRecipe extends Document {
     value: string; // emoji character, color hex code, or image URL
   };
   type: 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'drink';
+  image: string;
   ingredients: string[];
   steps: string[];
   links: string[];
@@ -69,6 +70,11 @@ const RecipeSchema = new Schema<IRecipe>(
         type: String,
         default: '🍽️',
       },
+    },
+    image: {
+      type: String,
+      default: '',
+      trim: true,
     },
     type: {
       type: String,

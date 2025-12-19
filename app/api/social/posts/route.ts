@@ -3,7 +3,9 @@ import connectDB from '@/lib/db';
 import SocialPost from '@/models/SocialPost';
 import Recipe from '@/models/Recipe';
 import User from '@/models/User';
+import FollowRequest from '@/models/FollowRequest';
 import { verifyToken } from '@/lib/jwt';
+import mongoose from 'mongoose';
 
 async function authenticateRequest(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
@@ -33,6 +35,7 @@ export async function GET(req: NextRequest) {
     const userId = auth.user!.userId;
     const page = parseInt(req.nextUrl.searchParams.get('page') || '1');
     const limit = parseInt(req.nextUrl.searchParams.get('limit') || '20');
+    const feed = req.nextUrl.searchParams.get('feed') || 'forYou'; // 'forYou' or 'friends'
     const skip = (page - 1) * limit;
 
     // Get posts with user and recipe info.
@@ -69,7 +72,43 @@ export async function GET(req: NextRequest) {
     const userMap = new Map(users.map((u: any) => [u._id.toString(), u]));
     const recipeMap = new Map(recipes.map((r: any) => [r._id.toString(), r]));
 
-    const enrichedPosts = posts.map((post: any) => {
+    // Get all users that the current user is following
+    const followedUserIds = new Set<string>();
+    const followRequests = await FollowRequest.find({
+      fromUserId: new mongoose.Types.ObjectId(userId),
+      status: 'accepted',
+    }).lean();
+    followRequests.forEach((fr: any) => {
+      followedUserIds.add(fr.toUserId.toString());
+    });
+
+    // Filter posts based on feed type
+    let visiblePosts = posts;
+    
+    if (feed === 'friends') {
+      // Friends feed: Only show posts from users you're following
+      visiblePosts = posts.filter((post: any) => {
+        const postUserId = post.userId?.toString();
+        const isOwnPost = postUserId === userId;
+        const isFollowing = followedUserIds.has(postUserId);
+        
+        return isOwnPost || isFollowing;
+      });
+    } else {
+      // For You feed: Show public accounts + followed private accounts
+      visiblePosts = posts.filter((post: any) => {
+        const postUserId = post.userId?.toString();
+        const postUser = userMap.get(postUserId);
+        const isPrivate = postUser?.isPrivate === true;
+        const isOwnPost = postUserId === userId;
+        const isFollowing = followedUserIds.has(postUserId);
+        
+        // Show if: own post, public account, or following a private account
+        return isOwnPost || !isPrivate || (isPrivate && isFollowing);
+      });
+    }
+
+    const enrichedPosts = visiblePosts.map((post: any) => {
       const postId = post._id.toString();
       const user = userMap.get(post.userId?.toString());
       const recipe = post.recipeId ? recipeMap.get(post.recipeId.toString()) : null;
@@ -115,6 +154,7 @@ export async function GET(req: NextRequest) {
           description: recipe.description,
           picture: recipe.picture,
           type: recipe.type,
+          code: recipe.code,
         } : null,
         createdAt: post.createdAt,
       };

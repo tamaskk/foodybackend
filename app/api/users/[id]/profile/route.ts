@@ -3,6 +3,7 @@ import connectDB from '@/lib/db';
 import User from '@/models/User';
 import Recipe from '@/models/Recipe';
 import SocialPost from '@/models/SocialPost';
+import FollowRequest from '@/models/FollowRequest';
 import { verifyToken } from '@/lib/jwt';
 import mongoose from 'mongoose';
 
@@ -53,6 +54,22 @@ export async function GET(
     ]);
     const totalLikes = agg.length > 0 ? agg[0].totalLikes : 0;
 
+    // Check if viewer is following this user (if private account)
+    const currentUserId = auth.user!.userId;
+    const isOwnProfile = currentUserId === id;
+    const isPrivate = user.isPrivate ?? false;
+    let canViewContent = !isPrivate || isOwnProfile;
+
+    // If private and not own profile, check if following
+    if (isPrivate && !isOwnProfile) {
+      const followRequest = await FollowRequest.findOne({
+        fromUserId: new mongoose.Types.ObjectId(currentUserId),
+        toUserId: userObjId,
+        status: 'accepted',
+      });
+      canViewContent = !!followRequest;
+    }
+
     return NextResponse.json({
       user: {
         id: user._id.toString(),
@@ -60,19 +77,27 @@ export async function GET(
         email: user.email,
         username: user.username,
         subscriptionTier: user.subscriptionTier,
-        isPrivate: user.isPrivate ?? false,
+        isPrivate: isPrivate,
         subscriptionEndDate: user.subscriptionEndDate,
         likes: totalLikes,
-        followers: 0,
-        following: 0,
+        followers: user.followers || 0,
+        following: user.following || 0,
         bio: 'Home cook sharing quick, cozy recipes.',
+        recipeBackgrounds: user.recipeBackgrounds || {
+          breakfast: '#FFF3D9',
+          lunch: '#DDF6FF',
+          dinner: '#FFE5F3',
+          snack: '#F6F4F0',
+          drink: '#E8F6F5',
+        },
       },
-      recipes: recipes.map((r: any) => ({
+      recipes: canViewContent ? recipes.map((r: any) => ({
         id: r._id.toString(),
         title: r.title,
         description: r.description,
         type: r.type,
-      })),
+      })) : [],
+      canViewContent,
     });
   } catch (error: any) {
     console.error('Get user profile error:', error);

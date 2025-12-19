@@ -4,6 +4,22 @@ import Recipe from '@/models/Recipe';
 import mongoose from 'mongoose';
 import { verifyToken } from '@/lib/jwt';
 
+async function generateUniqueCode(): Promise<string> {
+  // 5-digit zero-padded numeric code
+  const attempt = async () => {
+    const code = (Math.floor(Math.random() * 90000) + 10000).toString(); // 10000-99999
+    const exists = await Recipe.exists({ code });
+    if (exists) return null;
+    return code;
+  };
+
+  for (let i = 0; i < 10; i++) {
+    const result = await attempt();
+    if (result) return result;
+  }
+  throw new Error('Unable to generate unique code');
+}
+
 async function authenticateRequest(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
   
@@ -42,7 +58,9 @@ export async function GET(
       );
     }
 
-    const recipeDoc = await Recipe.findOne({ _id: id, userId }).lean();
+    // Allow fetching any recipe by ID (not just user's own recipes)
+    // This enables viewing recipes shared on social media
+    const recipeDoc = await Recipe.findOne({ _id: id }).lean();
 
     if (!recipeDoc) {
       return NextResponse.json(
@@ -50,14 +68,25 @@ export async function GET(
         { status: 404 }
       );
     }
-
+    
+    // Check if recipe belongs to user for ownership flag
     const recipe = recipeDoc as any;
+    const isOwn = recipe.userId.toString() === userId;
+
+    // Generate code if missing (same as GET /api/recipes)
+    let code = recipe.code;
+    if (!code || code === '' || code === null || code === undefined) {
+      code = await generateUniqueCode();
+      await Recipe.updateOne({ _id: recipe._id }, { $set: { code } });
+    }
 
     return NextResponse.json({
       recipe: {
         id: recipe._id.toString(),
         title: recipe.title,
         description: recipe.description,
+        owning: isOwn,
+        code,
         time: recipe.time,
         kcal: recipe.kcal,
         picture: recipe.picture,

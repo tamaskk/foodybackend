@@ -62,6 +62,8 @@ export async function GET(req: NextRequest) {
         message: n.message,
         type: n.type,
         read: n.read,
+        relatedId: n.relatedId,
+        fromUserId: n.fromUserId ? n.fromUserId.toString() : undefined,
         invitationId: n.invitationId ? n.invitationId.toString() : undefined,
         invitationStatus: n.invitationStatus,
         householdId: n.householdId ? n.householdId.toString() : undefined,

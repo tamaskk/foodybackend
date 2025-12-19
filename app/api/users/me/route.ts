@@ -62,9 +62,16 @@ export async function GET(req: NextRequest) {
         isPrivate: user.isPrivate ?? false,
         subscriptionEndDate: user.subscriptionEndDate,
         likes: totalLikes,
-        followers: 0,
-        following: 0,
+        followers: user.followers || 0,
+        following: user.following || 0,
         bio: 'Home cook sharing quick, cozy recipes.',
+        recipeBackgrounds: user.recipeBackgrounds || {
+          breakfast: '#FFF3D9',
+          lunch: '#DDF6FF',
+          dinner: '#FFE5F3',
+          snack: '#F6F4F0',
+          drink: '#E8F6F5',
+        },
       },
       recipes: recipes.map((r: any) => ({
         id: r._id.toString(),
