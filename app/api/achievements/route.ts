@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
     await connectDB();
 
     const userId = auth.user!.userId;
-    const achievements = await AchievementService.getAllAchievementsWithProgress(userId);
+    const achievements = await AchievementService.getAllAchievementsWithProgress(userId!);
 
     return NextResponse.json({ achievements });
   } catch (error: any) {
