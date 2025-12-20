@@ -4,6 +4,7 @@ import Recipe from '@/models/Recipe';
 import User from '@/models/User';
 import Household from '@/models/Household';
 import { verifyToken } from '@/lib/jwt';
+import AchievementService from '@/services/achievement.service';
 
 async function generateUniqueCode(): Promise<string> {
   // 5-digit zero-padded numeric code
@@ -190,6 +191,11 @@ export async function POST(req: NextRequest) {
     });
 
     console.log('Created recipe with code:', recipe.code, 'ID:', recipe._id);
+
+    // Track achievement (async, don't wait for it)
+    AchievementService.trackAndCheck(userId, 'recipes_created').catch(err => 
+      console.error('Achievement tracking error:', err)
+    );
 
     return NextResponse.json(
       {

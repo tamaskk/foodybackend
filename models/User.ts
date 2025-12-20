@@ -11,6 +11,20 @@ export interface IUser extends Document {
   householdId: mongoose.Types.ObjectId | null;
   followers: number;
   following: number;
+  streak: number;
+  lastActiveDate: Date | null;
+  progress: {
+    recipes_created: number;
+    recipes_saved: number;
+    photos_analyzed: number;
+    recipes_imported: number;
+    ai_recipes_generated: number;
+    posts_created: number;
+    likes_given: number;
+    comments_created: number;
+    followers_count: number;
+    household_actions: number;
+  };
   recipeBackgrounds: {
     breakfast: string;
     lunch: string;
@@ -75,6 +89,41 @@ const UserSchema: Schema = new Schema<IUser>(
     following: {
       type: Number,
       default: 0,
+    },
+    streak: {
+      type: Number,
+      default: 0,
+    },
+    lastActiveDate: {
+      type: Date,
+      default: null,
+    },
+    progress: {
+      type: {
+        recipes_created: { type: Number, default: 0 },
+        recipes_saved: { type: Number, default: 0 },
+        photos_analyzed: { type: Number, default: 0 },
+        recipes_imported: { type: Number, default: 0 },
+        ai_recipes_generated: { type: Number, default: 0 },
+        posts_created: { type: Number, default: 0 },
+        likes_given: { type: Number, default: 0 },
+        comments_created: { type: Number, default: 0 },
+        followers_count: { type: Number, default: 0 },
+        household_actions: { type: Number, default: 0 },
+      },
+    default: () => ({
+        recipes_created: 0,
+        recipes_saved: 0,
+        photos_analyzed: 0,
+        recipes_imported: 0,
+        ai_recipes_generated: 0,
+        posts_created: 0,
+        likes_given: 0,
+        comments_created: 0,
+        followers_count: 0,
+        household_actions: 0,
+      }),
+      _id: false,
     },
     recipeBackgrounds: {
       type: {

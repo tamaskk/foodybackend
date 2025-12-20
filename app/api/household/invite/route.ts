@@ -5,6 +5,7 @@ import User from '@/models/User';
 import HouseholdInvitation from '@/models/HouseholdInvitation';
 import Notification from '@/models/Notification';
 import { verifyToken } from '@/lib/jwt';
+import AchievementService from '@/services/achievement.service';
 
 export async function POST(req: NextRequest) {
   try {
@@ -93,6 +94,11 @@ export async function POST(req: NextRequest) {
     });
 
     await invitation.save();
+
+    // Track achievement (async, don't wait for it)
+    AchievementService.trackAndCheck(userId, 'household_actions').catch(err => 
+      console.error('Achievement tracking error:', err)
+    );
 
     // Create notification for the invited user (align with Notification schema)
     const notification = new Notification({

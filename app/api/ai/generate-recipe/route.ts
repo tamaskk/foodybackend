@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { verifyToken } from "@/lib/jwt";
+import AchievementService from '@/services/achievement.service';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -467,6 +468,11 @@ Focus on generating a complete, original, detailed recipe. Do NOT include any li
         value: "🍽️",
       },
     };
+
+    // Track achievement (async, don't wait for it)
+    AchievementService.trackAndCheck(auth.user!.userId, 'ai_recipes_generated').catch(err => 
+      console.error('Achievement tracking error:', err)
+    );
 
     return NextResponse.json({
       success: true,

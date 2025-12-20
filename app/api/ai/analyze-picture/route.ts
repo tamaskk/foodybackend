@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/jwt';
 import { AnalyzeSocialMediaService } from '@/services/analyze-social-media.service';
+import AchievementService from '@/services/achievement.service';
 
 async function authenticateRequest(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
@@ -63,6 +64,11 @@ export async function POST(req: NextRequest) {
 
     const analyzeService = new AnalyzeSocialMediaService();
     const recipe = await analyzeService.analyzePhoto([dataUrl]);
+
+    // Track achievement
+    AchievementService.trackAndCheck(auth.user!.userId, 'photos_analyzed').catch(err => 
+      console.error('Achievement tracking error:', err)
+    );
 
     return NextResponse.json(recipe, { status: 200 });
   } catch (error: any) {

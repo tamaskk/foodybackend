@@ -5,6 +5,7 @@ import Notification from '@/models/Notification';
 import User from '@/models/User';
 import mongoose from 'mongoose';
 import { verifyToken } from '@/lib/jwt';
+import AchievementService from '@/services/achievement.service';
 
 async function authenticateRequest(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
@@ -60,8 +61,16 @@ export async function POST(
     await User.findByIdAndUpdate(userId, { $inc: { followers: 1 } });
     await User.findByIdAndUpdate(followRequest.fromUserId, { $inc: { following: 1 } });
 
-    // Create notification for requester
+    // Update follower count in progress and check achievements
     const toUser = await User.findById(userId);
+    if (toUser) {
+      await AchievementService.setProgress(userId, 'followers_count', toUser.followers || 0);
+      AchievementService.checkAchievements(userId, 'followers_count').catch(err => 
+        console.error('Achievement tracking error:', err)
+      );
+    }
+
+    // Create notification for requester
     await Notification.create({
       userId: followRequest.fromUserId,
       title: 'Follow Request Accepted',

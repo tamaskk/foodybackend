@@ -57,6 +57,30 @@ export async function POST(request: NextRequest) {
       subscriptionTier: 'free',
       subscriptionEndDate: null,
       isPrivate: false,
+      householdId: null,
+      followers: 0,
+      following: 0,
+      streak: 0,
+      lastActiveDate: null,
+      progress: {
+        recipes_created: 0,
+        recipes_saved: 0,
+        photos_analyzed: 0,
+        recipes_imported: 0,
+        ai_recipes_generated: 0,
+        posts_created: 0,
+        likes_given: 0,
+        comments_created: 0,
+        followers_count: 0,
+        household_actions: 0,
+      },
+      recipeBackgrounds: {
+        breakfast: '#FFF3D9',
+        lunch: '#DDF6FF',
+        dinner: '#FFE5F3',
+        snack: '#F6F4F0',
+        drink: '#E8F6F5',
+      },
     });
 
     // Generate JWT token
@@ -66,21 +90,34 @@ export async function POST(request: NextRequest) {
       username: user.username,
     });
 
+    console.log('user', user);
+    const response = {
+      message: 'User registered successfully',
+      token,
+      user: {
+        id: user._id.toString(),
+        name: user.name,
+        email: user.email,
+        username: user.username,
+        subscriptionTier: user.subscriptionTier,
+        subscriptionEndDate: user.subscriptionEndDate,
+        isPrivate: user.isPrivate ?? false,
+        followers: user.followers,
+        following: user.following,
+        recipeBackgrounds: user.recipeBackgrounds,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        householdId: user.householdId,
+        streak: user.streak,
+        lastActiveDate: user.lastActiveDate,
+        progress: user.progress,
+      },
+      userObject: user,
+    };
+    console.log('response', response);
     // Return user data (without password) and token
     return NextResponse.json(
-      {
-        message: 'User registered successfully',
-        token,
-        user: {
-          id: user._id.toString(),
-          name: user.name,
-          email: user.email,
-          username: user.username,
-          subscriptionTier: user.subscriptionTier,
-          subscriptionEndDate: user.subscriptionEndDate,
-          isPrivate: user.isPrivate ?? false,
-        },
-      },
+      response,
       { status: 201 }
     );
   } catch (error: any) {

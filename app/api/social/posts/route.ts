@@ -6,6 +6,7 @@ import User from '@/models/User';
 import FollowRequest from '@/models/FollowRequest';
 import { verifyToken } from '@/lib/jwt';
 import mongoose from 'mongoose';
+import AchievementService from '@/services/achievement.service';
 
 async function authenticateRequest(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
@@ -229,6 +230,11 @@ export async function POST(req: NextRequest) {
       savedUserIds: [],
       comments: [],
     });
+
+    // Track achievement
+    AchievementService.trackAndCheck(userId, 'posts_created').catch(err => 
+      console.error('Achievement tracking error:', err)
+    );
 
     // Fetch user and recipe info separately to avoid populate issues
     const user = await User.findById(userId).lean();

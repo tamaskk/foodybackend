@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/jwt';
 import { ApifyService } from '@/services/apify.service';
 import { AnalyzeSocialMediaService } from '@/services/analyze-social-media.service';
+import AchievementService from '@/services/achievement.service';
 
 async function authenticateRequest(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
@@ -135,6 +136,10 @@ export async function POST(req: NextRequest) {
         const analyzeSubtitles = await analyzeService.analyzeSubtitles(subtitlesLink);
         if (analyzeSubtitles.result === 'success' && analyzeSubtitles.data) {
           console.log('Subtitles analyzed successfully');
+          // Track achievement
+          AchievementService.trackAndCheck(auth.user!.userId, 'recipes_imported').catch(err => 
+            console.error('Achievement tracking error:', err)
+          );
           return NextResponse.json({ success: true, recipe: analyzeSubtitles.data });
         }
       }
@@ -145,6 +150,10 @@ export async function POST(req: NextRequest) {
         const analyzeDescription = await analyzeService.analyzeDescription(caption);
         if (analyzeDescription.result === 'success' && analyzeDescription.data) {
           console.log('Caption analyzed successfully');
+          // Track achievement
+          AchievementService.trackAndCheck(auth.user!.userId, 'recipes_imported').catch(err => 
+            console.error('Achievement tracking error:', err)
+          );
           return NextResponse.json({ success: true, recipe: analyzeDescription.data });
         }
       }
@@ -154,6 +163,10 @@ export async function POST(req: NextRequest) {
       const analyzeByOCR = await analyzeService.analyzeByOCR(videoUrl);
       if (analyzeByOCR.result === 'success' && analyzeByOCR.data) {
         console.log('OCR analyzed successfully');
+        // Track achievement
+        AchievementService.trackAndCheck(auth.user!.userId, 'recipes_imported').catch(err => 
+          console.error('Achievement tracking error:', err)
+        );
         return NextResponse.json({ success: true, recipe: analyzeByOCR.data });
       }
 
@@ -162,6 +175,10 @@ export async function POST(req: NextRequest) {
       const analyzeVoice = await analyzeService.analyzeVoice(videoUrl);
       if (analyzeVoice.result === 'success' && analyzeVoice.data) {
         console.log('Voice analyzed successfully');
+        // Track achievement
+        AchievementService.trackAndCheck(auth.user!.userId, 'recipes_imported').catch(err => 
+          console.error('Achievement tracking error:', err)
+        );
         return NextResponse.json({ success: true, recipe: analyzeVoice.data });
       }
 
@@ -187,6 +204,11 @@ export async function POST(req: NextRequest) {
       console.log('Analyzing photo');
       const analyzedPhoto = await analyzeService.analyzePhoto(filteredImages);
       console.log('Photo analyzed successfully');
+
+      // Track achievement
+      AchievementService.trackAndCheck(auth.user!.userId, 'recipes_imported').catch(err => 
+        console.error('Achievement tracking error:', err)
+      );
 
       return NextResponse.json({ success: true, recipe: analyzedPhoto });
     }

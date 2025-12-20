@@ -4,6 +4,7 @@ import SocialPost from '@/models/SocialPost';
 import User from '@/models/User';
 import { verifyToken } from '@/lib/jwt';
 import mongoose from 'mongoose';
+import AchievementService from '@/services/achievement.service';
 
 async function authenticateRequest(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
@@ -69,6 +70,11 @@ export async function POST(
     await SocialPost.updateOne(
       { _id: postId },
       { $set: { comments } }
+    );
+
+    // Track achievement (async, don't wait for it)
+    AchievementService.trackAndCheck(userId, 'comments_created').catch(err => 
+      console.error('Achievement tracking error:', err)
     );
 
     // Get user info

@@ -82,6 +82,7 @@ export async function GET(
         likes: totalLikes,
         followers: user.followers || 0,
         following: user.following || 0,
+        streak: user.streak || 0,
         bio: 'Home cook sharing quick, cozy recipes.',
         recipeBackgrounds: user.recipeBackgrounds || {
           breakfast: '#FFF3D9',

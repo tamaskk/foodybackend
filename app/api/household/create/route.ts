@@ -3,6 +3,7 @@ import dbConnect from '@/lib/db';
 import Household from '@/models/Household';
 import User from '@/models/User';
 import { verifyToken } from '@/lib/jwt';
+import AchievementService from '@/services/achievement.service';
 
 // Generate a random 6-character invite code
 function generateInviteCode(): string {
@@ -76,6 +77,11 @@ export async function POST(req: NextRequest) {
     // Verify it was saved
     const updatedUser = await User.findById(userId);
     console.log('User updated with householdId:', { userId, householdId: updatedUser?.householdId });
+
+    // Track achievement (async, don't wait for it)
+    AchievementService.trackAndCheck(userId, 'household_actions').catch(err => 
+      console.error('Achievement tracking error:', err)
+    );
 
     // Populate members for response
     const populatedHousehold = await Household.findById(household._id).populate('members', 'name email username');

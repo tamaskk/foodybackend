@@ -3,6 +3,7 @@ import connectDB from '@/lib/db';
 import SocialPost from '@/models/SocialPost';
 import { verifyToken } from '@/lib/jwt';
 import mongoose from 'mongoose';
+import AchievementService from '@/services/achievement.service';
 
 async function authenticateRequest(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
@@ -66,6 +67,12 @@ export async function POST(
         { _id: postId },
         { $set: { likedUserIds } }
       );
+      
+      // Track achievement (async, don't wait for it)
+      AchievementService.trackAndCheck(userId, 'likes_given').catch(err => 
+        console.error('Achievement tracking error:', err)
+      );
+      
       return NextResponse.json({
         liked: true,
         likes: likedUserIds.length,

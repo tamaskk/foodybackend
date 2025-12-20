@@ -4,6 +4,7 @@ import dbConnect from '@/lib/db';
 import Household from '@/models/Household';
 import User from '@/models/User';
 import { verifyToken } from '@/lib/jwt';
+import AchievementService from '@/services/achievement.service';
 
 export async function POST(req: NextRequest) {
   try {
@@ -55,6 +56,11 @@ export async function POST(req: NextRequest) {
     await User.updateOne(
       { _id: userId },
       { $set: { householdId: household._id } }
+    );
+
+    // Track achievement (async, don't wait for it)
+    AchievementService.trackAndCheck(userId, 'household_actions').catch(err => 
+      console.error('Achievement tracking error:', err)
     );
 
     return NextResponse.json({
