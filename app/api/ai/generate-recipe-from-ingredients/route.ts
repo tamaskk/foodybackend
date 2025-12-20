@@ -471,7 +471,7 @@ Focus on generating a complete, original, detailed recipe using the provided ing
     };
 
     // Track achievement (async, don't wait for it)
-    AchievementService.trackAndCheck(auth.user!.userId, 'ai_recipes_generated').catch(err => 
+    AchievementService.trackAndCheck(auth.user!.userId!, 'ai_recipes_generated').catch(err => 
       console.error('Achievement tracking error:', err)
     );
 

@@ -232,7 +232,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Track achievement
-    AchievementService.trackAndCheck(userId, 'posts_created').catch(err => 
+    AchievementService.trackAndCheck(userId!, 'posts_created').catch(err => 
       console.error('Achievement tracking error:', err)
     );
 

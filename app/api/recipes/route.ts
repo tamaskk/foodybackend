@@ -193,7 +193,7 @@ export async function POST(req: NextRequest) {
     console.log('Created recipe with code:', recipe.code, 'ID:', recipe._id);
 
     // Track achievement (async, don't wait for it)
-    AchievementService.trackAndCheck(userId, 'recipes_created').catch(err => 
+    AchievementService.trackAndCheck(userId!, 'recipes_created').catch(err => 
       console.error('Achievement tracking error:', err)
     );
 

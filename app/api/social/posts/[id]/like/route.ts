@@ -69,7 +69,7 @@ export async function POST(
       );
       
       // Track achievement (async, don't wait for it)
-      AchievementService.trackAndCheck(userId, 'likes_given').catch(err => 
+      AchievementService.trackAndCheck(userId!, 'likes_given').catch(err => 
         console.error('Achievement tracking error:', err)
       );
       

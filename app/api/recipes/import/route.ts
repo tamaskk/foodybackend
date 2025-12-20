@@ -137,7 +137,7 @@ export async function POST(req: NextRequest) {
         if (analyzeSubtitles.result === 'success' && analyzeSubtitles.data) {
           console.log('Subtitles analyzed successfully');
           // Track achievement
-          AchievementService.trackAndCheck(auth.user!.userId, 'recipes_imported').catch(err => 
+          AchievementService.trackAndCheck(auth.user!.userId!, 'recipes_imported').catch(err => 
             console.error('Achievement tracking error:', err)
           );
           return NextResponse.json({ success: true, recipe: analyzeSubtitles.data });
@@ -151,7 +151,7 @@ export async function POST(req: NextRequest) {
         if (analyzeDescription.result === 'success' && analyzeDescription.data) {
           console.log('Caption analyzed successfully');
           // Track achievement
-          AchievementService.trackAndCheck(auth.user!.userId, 'recipes_imported').catch(err => 
+          AchievementService.trackAndCheck(auth.user!.userId!, 'recipes_imported').catch(err => 
             console.error('Achievement tracking error:', err)
           );
           return NextResponse.json({ success: true, recipe: analyzeDescription.data });
@@ -164,7 +164,7 @@ export async function POST(req: NextRequest) {
       if (analyzeByOCR.result === 'success' && analyzeByOCR.data) {
         console.log('OCR analyzed successfully');
         // Track achievement
-        AchievementService.trackAndCheck(auth.user!.userId, 'recipes_imported').catch(err => 
+        AchievementService.trackAndCheck(auth.user!.userId!, 'recipes_imported').catch(err => 
           console.error('Achievement tracking error:', err)
         );
         return NextResponse.json({ success: true, recipe: analyzeByOCR.data });
@@ -176,7 +176,7 @@ export async function POST(req: NextRequest) {
       if (analyzeVoice.result === 'success' && analyzeVoice.data) {
         console.log('Voice analyzed successfully');
         // Track achievement
-        AchievementService.trackAndCheck(auth.user!.userId, 'recipes_imported').catch(err => 
+        AchievementService.trackAndCheck(auth.user!.userId!, 'recipes_imported').catch(err => 
           console.error('Achievement tracking error:', err)
         );
         return NextResponse.json({ success: true, recipe: analyzeVoice.data });
@@ -206,7 +206,7 @@ export async function POST(req: NextRequest) {
       console.log('Photo analyzed successfully');
 
       // Track achievement
-      AchievementService.trackAndCheck(auth.user!.userId, 'recipes_imported').catch(err => 
+      AchievementService.trackAndCheck(auth.user!.userId!, 'recipes_imported').catch(err => 
         console.error('Achievement tracking error:', err)
       );
 

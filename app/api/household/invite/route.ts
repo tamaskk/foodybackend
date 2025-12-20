@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
     await invitation.save();
 
     // Track achievement (async, don't wait for it)
-    AchievementService.trackAndCheck(userId, 'household_actions').catch(err => 
+    AchievementService.trackAndCheck(userId!, 'household_actions').catch(err => 
       console.error('Achievement tracking error:', err)
     );
 

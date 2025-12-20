@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
     const recipe = await analyzeService.analyzePhoto([dataUrl]);
 
     // Track achievement
-    AchievementService.trackAndCheck(auth.user!.userId, 'photos_analyzed').catch(err => 
+    AchievementService.trackAndCheck(auth.user!.userId!, 'photos_analyzed').catch(err => 
       console.error('Achievement tracking error:', err)
     );
 

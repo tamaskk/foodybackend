@@ -470,7 +470,7 @@ Focus on generating a complete, original, detailed recipe. Do NOT include any li
     };
 
     // Track achievement (async, don't wait for it)
-    AchievementService.trackAndCheck(auth.user!.userId, 'ai_recipes_generated').catch(err => 
+    AchievementService.trackAndCheck(auth.user!.userId!, 'ai_recipes_generated').catch(err => 
       console.error('Achievement tracking error:', err)
     );
 

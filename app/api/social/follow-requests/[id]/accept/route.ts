@@ -64,8 +64,8 @@ export async function POST(
     // Update follower count in progress and check achievements
     const toUser = await User.findById(userId);
     if (toUser) {
-      await AchievementService.setProgress(userId, 'followers_count', toUser.followers || 0);
-      AchievementService.checkAchievements(userId, 'followers_count').catch(err => 
+      await AchievementService.setProgress(userId!, 'followers_count', toUser.followers || 0);
+      AchievementService.checkAchievements(userId!, 'followers_count').catch(err => 
         console.error('Achievement tracking error:', err)
       );
     }

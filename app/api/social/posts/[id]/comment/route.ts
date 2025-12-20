@@ -73,7 +73,7 @@ export async function POST(
     );
 
     // Track achievement (async, don't wait for it)
-    AchievementService.trackAndCheck(userId, 'comments_created').catch(err => 
+    AchievementService.trackAndCheck(userId!, 'comments_created').catch(err => 
       console.error('Achievement tracking error:', err)
     );
 
