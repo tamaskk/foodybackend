@@ -1,65 +1,720 @@
-import Image from "next/image";
+"use client"
 
-export default function Home() {
+import { motion } from "framer-motion"
+import { FaApple, FaGooglePlay } from "react-icons/fa"
+
+export default function FoodyLanding() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="bg-[#FFF8F3] text-[#2D241E] overflow-hidden">
+      {/* NAVBAR */}
+      <motion.nav
+        initial={{ y: -30, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="max-w-7xl mx-auto flex items-center justify-between px-6 py-6"
+      >
+        <div className="flex items-center gap-2">
+          <div className="bg-[#FF6B35] text-white px-3 py-1 rounded-lg font-black text-xl">
+            Foody
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+        <div className="hidden md:flex gap-8 text-sm font-medium">
+          <a href="#features" className="hover:text-[#FF6B35] transition-colors">Features</a>
+          <a href="#services" className="hover:text-[#FF6B35] transition-colors">Services</a>
+          <a href="#testimonials" className="hover:text-[#FF6B35] transition-colors">Reviews</a>
+          <a href="/contact" className="hover:text-[#FF6B35] transition-colors">Contact</a>
+        </div>
+        <div className="flex gap-2">
+          <button className="bg-[#FF6B35] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#FF5722] transition-colors flex items-center gap-2">
+            <div className="text-base"><FaApple /></div>
+            <div className="text-left">
+              <div className="text-[10px] leading-tight">Download on the</div>
+              <div className="text-sm font-bold leading-tight">App Store</div>
+            </div>
+          </button>
+          <button className="bg-[#FF6B35] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#FF5722] transition-colors flex items-center gap-2">
+            <div className="text-base"><FaGooglePlay /></div>
+            <div className="text-left">
+              <div className="text-[10px] leading-tight">Get it on</div>
+              <div className="text-sm font-bold leading-tight">Google Play</div>
+            </div>
+          </button>
+        </div>
+      </motion.nav>
+
+      {/* HERO */}
+      <section className="max-w-7xl mx-auto px-6 pt-12 pb-20">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+            <h1 className="text-5xl lg:text-6xl font-black leading-tight mb-6">
+              Your Trusted Partner for <span className="text-[#FF6B35]">Recipe Management</span>
+            </h1>
+            <p className="text-lg text-[#8B7E74] mb-8 leading-relaxed">
+              Save, organize, and share recipes with AI-powered tools. Join thousands of home cooks making meal planning effortless.
+            </p>
+            <div className="flex gap-4 mb-8">
+              <motion.button
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+                className="bg-black text-white px-6 py-3 rounded-xl font-medium flex items-center gap-3"
+              >
+                <div className="text-xl"><FaApple /></div>
+                <div className="text-left">
+                  <div className="text-xs">Download on the</div>
+                  <div className="text-base font-bold">App Store</div>
+                </div>
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+                className="bg-black text-white px-6 py-3 rounded-xl font-medium flex items-center gap-3"
+              >
+                <div className="text-xl"><FaGooglePlay /></div>
+                <div className="text-left">
+                  <div className="text-xs">Get it on</div>
+                  <div className="text-base font-bold">Google Play</div>
+                </div>
+              </motion.button>
+            </div>
+          </motion.div>
+
+          {/* HERO PHONE MOCK */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+            className="relative"
+          >
+            <div className="relative z-10">
+              <PhoneMockup>
+                <div className="p-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-bold text-lg">All Services</h3>
+                    <div className="text-xs bg-gray-100 px-3 py-1 rounded-full">in one place</div>
+                  </div>
+                  <div className="bg-gray-50 rounded-xl p-3 mb-4">
+                    <p className="text-xs text-gray-500 mb-1">Category</p>
+                    <div className="flex gap-2 overflow-x-auto pb-2">
+                      <CategoryChip emoji="🍳" label="Breakfast" />
+                      <CategoryChip emoji="🍱" label="Lunch" />
+                      <CategoryChip emoji="🍽️" label="Dinner" />
+                    </div>
+                  </div>
+                  <RecipeMiniCard title="Creamy Pasta" time="25 min" color="#FFF3D9" />
+                  <RecipeMiniCard title="Greek Salad" time="15 min" color="#DDF6FF" />
+                  <RecipeMiniCard title="Chicken Curry" time="45 min" color="#FFE5F3" />
+                </div>
+              </PhoneMockup>
+            </div>
+            {/* Floating cards */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+              className="absolute -left-8 top-12 bg-white rounded-2xl shadow-lg p-3 text-sm hidden lg:block"
+            >
+              <div className="flex items-center gap-2">
+                <div className="w-10 h-10 bg-[#FF6B35] rounded-full flex items-center justify-center text-xl">👨‍🍳</div>
+                <div>
+                  <p className="font-semibold text-xs">John Anderson</p>
+                  <p className="text-xs text-gray-500">Pro Chef</p>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        </div>
+
+        {/* Partner Logos */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.4 }}
+          className="mt-16 pt-8 border-t border-gray-200"
+        >
+          <div className="flex justify-center items-center gap-12 flex-wrap opacity-40">
+            <LogoText text="TikTok" />
+            <LogoText text="Instagram" />
+            <LogoText text="OpenAI" />
+            <LogoText text="Firebase" />
+            <LogoText text="Stripe" />
+          </div>
+        </motion.div>
+      </section>
+
+      {/* FEATURE 1 - MY CART / SAVED RECIPES */}
+      <section className="py-20">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <div className="bg-[#FF6B35] rounded-[3rem] p-8 lg:p-12">
+                <PhoneMockup bgColor="white">
+                  <div className="p-4">
+                    <h3 className="font-bold text-lg mb-4">My Saved</h3>
+                    <SavedRecipeItem 
+                      title="AI Chef salad"
+                      price="Ready in 20min"
+                      image="🥗"
+                    />
+                    <SavedRecipeItem 
+                      title="Spaghetti recipe"
+                      price="Ready in 30min"
+                      image="🍝"
+                    />
+                    <SavedRecipeItem 
+                      title="Air installation"
+                      price="Ready in 15min"
+                      image="🥙"
+                    />
+                  </div>
+                </PhoneMockup>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+            >
+              <div className="inline-block bg-[#FFE5D9] px-4 py-1 rounded-full text-sm font-semibold text-[#FF6B35] mb-4">
+                Save Recipes
+              </div>
+              <h2 className="text-4xl font-black mb-6 leading-tight">
+                Smart and secure recipe management
+              </h2>
+              <p className="text-[#8B7E74] mb-8 leading-relaxed">
+                Keep all your favorite recipes organized in one place. Access them anytime on your phone.
+              </p>
+              
+              <div className="space-y-6">
+                <FeatureItem 
+                  number="1"
+                  title="Fast & Easy Saving"
+                  description="Save recipes from social media with just a link. Our AI extracts all the details automatically."
+                />
+                <FeatureItem 
+                  number="2"
+                  title="Available 24/7"
+                  description="Access your recipes anytime, anywhere. Cook what you love whenever inspiration strikes."
+                />
+                <FeatureItem 
+                  number="3"
+                  title="Secure Backup"
+                  description="Your recipes are safely stored in the cloud. Never lose a favorite recipe again."
+                />
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* STATS SECTION */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+            >
+              <div className="inline-block bg-[#FFE5D9] px-4 py-1 rounded-full text-sm font-semibold text-[#FF6B35] mb-4">
+                Your Kitchen
+              </div>
+              <h2 className="text-4xl font-black mb-6 leading-tight">
+                Effortless living with trusted recipes
+              </h2>
+              <p className="text-[#8B7E74] mb-8 leading-relaxed">
+                Join thousands of home cooks who are making meal planning simpler. Whether you&apos;re a beginner or a pro chef, Foody makes cooking enjoyable.
+              </p>
+              <motion.button
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+                className="bg-[#FF6B35] text-white px-8 py-3 rounded-full font-semibold"
+              >
+                Get Started
+              </motion.button>
+
+              <div className="grid grid-cols-2 gap-8 mt-12">
+                <StatBox value="50,000+" label="Active users" />
+                <StatBox value="1500+" label="Service Providers" />
+                <StatBox value="4.9/5" label="Average Rating" />
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <img 
+                src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=600&h=700&fit=crop" 
+                alt="Cooking together"
+                className="rounded-3xl shadow-2xl w-full object-cover"
+              />
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section id="services" className="py-20 bg-[#FFF8F3]">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <div className="inline-block bg-[#FFE5D9] px-4 py-1 rounded-full text-sm font-semibold text-[#FF6B35] mb-4">
+              Recipe App
+            </div>
+            <h2 className="text-4xl font-black mb-4">
+              From booking to payment <br />here&apos;s how
+            </h2>
+            <p className="text-[#8B7E74] max-w-2xl mx-auto mb-16">
+              Easily cook meals like a service professional by following recipes at your own pace. Foody makes every step seamless and enjoyable.
+            </p>
+          </motion.div>
+
+          <div className="grid lg:grid-cols-2 gap-16 items-center mb-16">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="space-y-8 text-left"
+            >
+              <ProcessStep 
+                number="1"
+                title="Select a Recipe"
+                description="Browse our catalog, import from social media, or generate recipes with AI based on your preferences."
+              />
+              <ProcessStep 
+                number="2"
+                title="Save Your Schedule"
+                description="Bookmark recipes for later, create meal plans, and organize your cooking week effortlessly."
+              />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+            >
+              <PhoneMockup>
+                <div className="p-4">
+                  <div className="bg-gray-50 rounded-2xl p-4 mb-3">
+                    <div className="flex gap-3 mb-3">
+                      <div className="w-16 h-16 bg-[#FF6B35] rounded-xl"></div>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-sm mb-1">Recipe Details</h4>
+                        <p className="text-xs text-gray-500">Ingredients & Steps</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      {[1,2,3,4].map(i => (
+                        <div key={i} className="w-14 h-14 bg-gray-200 rounded-lg"></div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="bg-gradient-to-br from-[#FF6B35] to-[#FF8C42] rounded-2xl p-4 text-white">
+                    <p className="text-xs mb-1 opacity-90">Featured Recipe</p>
+                    <h4 className="font-bold mb-2">Italian Carbonara</h4>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs">Ready in 30min</span>
+                      <button className="bg-white text-[#FF6B35] px-4 py-1 rounded-full text-xs font-semibold">
+                        View
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </PhoneMockup>
+            </motion.div>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="order-2 lg:order-1"
+            >
+              <PhoneMockup>
+                <div className="p-4">
+                  <h3 className="font-bold mb-4">Get Notified</h3>
+                  <NotificationCard 
+                    icon="🏆"
+                    title="Achievement Unlocked!"
+                    description="You earned Food Creator badge"
+                    time="2m ago"
+                  />
+                  <NotificationCard 
+                    icon="❤️"
+                    title="Sarah liked your post"
+                    description="Your pasta recipe"
+                    time="1h ago"
+                  />
+                  <NotificationCard 
+                    icon="👥"
+                    title="New Follower"
+                    description="Mike started following you"
+                    time="3h ago"
+                  />
+                </div>
+              </PhoneMockup>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="space-y-8 text-left order-1 lg:order-2"
+            >
+              <ProcessStep 
+                number="3"
+                title="Get Notified"
+                description="Receive real-time notifications for recipe updates, social interactions, achievements unlocked, and more."
+              />
+              <ProcessStep 
+                number="4"
+                title="Pay Securely & Save"
+                description="Upgrade to Pro with secure Stripe payments. Unlock unlimited recipes, premium features, and ad-free cooking."
+              />
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* TESTIMONIALS */}
+      <section id="testimonials" className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <div className="inline-block bg-[#FFE5D9] px-4 py-1 rounded-full text-sm font-semibold text-[#FF6B35] mb-4">
+              Testimonial
+            </div>
+            <h2 className="text-4xl font-black mb-4">
+              Recipe management made easy <br />hear it straight from our users
+            </h2>
+            <p className="text-[#8B7E74] max-w-2xl mx-auto">
+              Every cook is a critic but we&apos;ve received amazing love from thousands of home cooks using Foody every day to make meals easy.
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <TestimonialCard 
+              text="An amazing platform where I never have to worry about losing my favorite recipes. The AI import feature is incredible!"
+              author="Sarah Mitchell"
+              role="Home Chef"
+              avatar="👩‍🍳"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <TestimonialCard 
+              text="I love the emergency call feature! Whenever I need help with a recipe, the community is there for me. It's like having friends cooking with me."
+              author="David Park"
+              role="Food Blogger"
+              avatar="👨‍🍳"
+            />
+            <TestimonialCard 
+              text="Their gamification with achievements and levels keeps me motivated to try new recipes. I've discovered so many amazing dishes!"
+              author="Emma Wilson"
+              role="Cooking Enthusiast"
+              avatar="👩‍🍳"
+            />
+          </div>
         </div>
-      </main>
+      </section>
+
+      {/* FINAL CTA */}
+      <section className="py-20 bg-gradient-to-br from-[#FF6B35] to-[#FF8C42]">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="text-white"
+            >
+              <h2 className="text-4xl lg:text-5xl font-black mb-6 leading-tight">
+                One app for fast, trusted recipe management
+              </h2>
+              <p className="text-white/90 mb-8 text-lg leading-relaxed">
+                Quick, smart recipe tool that puts you on track to cooking success. Accessible with just one tap, you can easily manage all your recipes, meal plans, and cooking adventures in one beautiful app.
+              </p>
+              <div className="flex gap-4">
+                <motion.button
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="bg-black text-white px-6 py-3 rounded-xl font-medium flex items-center gap-3"
+                >
+                  <div className="text-xl"><FaApple /></div>
+                  <div className="text-left">
+                    <div className="text-xs">Download on the</div>
+                    <div className="text-base font-bold">App Store</div>
+                  </div>
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="bg-black text-white px-6 py-3 rounded-xl font-medium flex items-center gap-3"
+                >
+                  <div className="text-xl"><FaGooglePlay /></div>
+                  <div className="text-left">
+                    <div className="text-xs">Get it on</div>
+                    <div className="text-base font-bold">Google Play</div>
+                  </div>
+                </motion.button>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <div className="grid grid-cols-2 gap-4">
+                <PhoneMockup compact>
+                  <div className="p-3">
+                    <div className="bg-gradient-to-br from-[#FFE5D9] to-[#FFF3D9] rounded-xl p-3 mb-2">
+                      <p className="text-xs font-bold mb-1">Home Chef</p>
+                      <p className="text-[10px] text-gray-600">1,234 Recipes</p>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="h-12 bg-gray-100 rounded-lg"></div>
+                      <div className="h-12 bg-gray-100 rounded-lg"></div>
+                    </div>
+                  </div>
+                </PhoneMockup>
+                <div className="pt-12">
+                  <PhoneMockup compact>
+                    <div className="p-3">
+                      <div className="bg-[#FF6B35] text-white rounded-xl p-3 mb-2">
+                        <p className="text-xs font-bold mb-1">Pro Chef</p>
+                        <p className="text-[10px] opacity-90">Level 24</p>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="h-12 bg-gray-100 rounded-lg"></div>
+                        <div className="h-12 bg-gray-100 rounded-lg"></div>
+                      </div>
+                    </div>
+                  </PhoneMockup>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="bg-[#2D241E] text-[#F9F7F2] py-16">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid md:grid-cols-4 gap-12 mb-12">
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="bg-[#FF6B35] text-white px-3 py-1 rounded-lg font-black text-lg">
+                  Foody
+                </div>
+              </div>
+              <p className="text-sm opacity-70 mb-4">
+                A unified platform that connects foodies for sharing, learning, and more. Restaurant quality cooking at home with AI-powered recipe tools.
+              </p>
+              <div className="flex gap-3">
+                <SocialIcon icon="📘" />
+                <SocialIcon icon="🐦" />
+                <SocialIcon icon="📷" />
+                <SocialIcon icon="💼" />
+              </div>
+            </div>
+
+            <div>
+              <h4 className="font-bold mb-4">Menu</h4>
+              <div className="space-y-2 text-sm opacity-70">
+                <a href="/" className="block hover:opacity-100 cursor-pointer">Home</a>
+                <a href="/#features" className="block hover:opacity-100 cursor-pointer">About</a>
+                <a href="/#services" className="block hover:opacity-100 cursor-pointer">Services</a>
+                <a href="/contact" className="block hover:opacity-100 cursor-pointer">Contact</a>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="font-bold mb-4">Services</h4>
+              <div className="space-y-2 text-sm opacity-70">
+                <p className="hover:opacity-100 cursor-pointer">AI Recipe Import</p>
+                <p className="hover:opacity-100 cursor-pointer">Picture Analysis</p>
+                <p className="hover:opacity-100 cursor-pointer">Household Management</p>
+                <p className="hover:opacity-100 cursor-pointer">See all</p>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="font-bold mb-4">Help</h4>
+              <div className="space-y-2 text-sm opacity-70">
+                <p className="hover:opacity-100 cursor-pointer">FAQ</p>
+                <p className="hover:opacity-100 cursor-pointer">Contact us</p>
+                <p className="hover:opacity-100 cursor-pointer">Support</p>
+                <p className="hover:opacity-100 cursor-pointer">Updates</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-sm opacity-70">
+            <p>© 2025 Foody. Recipes are for everyone.</p>
+            <div className="flex gap-6">
+              <a href="#" className="hover:opacity-100">Privacy Policy</a>
+              <a href="#" className="hover:opacity-100">Terms & Conditions</a>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
-  );
+  )
+}
+
+/* ============ COMPONENTS ============ */
+
+function PhoneMockup({ children, bgColor = "white", compact = false }: { children: React.ReactNode; bgColor?: string; compact?: boolean }) {
+  return (
+    <div className={`relative ${compact ? 'w-40' : 'max-w-sm'} mx-auto`}>
+      <div className="bg-black rounded-[2.5rem] p-2">
+        <div className="bg-gray-900 rounded-[2.2rem] p-1">
+          <div className={`bg-${bgColor} rounded-[2rem] overflow-hidden ${compact ? 'h-72' : 'h-[32rem]'}`}>
+            {/* Notch */}
+            <div className="bg-black h-6 w-32 mx-auto rounded-b-2xl"></div>
+            {children}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function CategoryChip({ emoji, label }: { emoji: string; label: string }) {
+  return (
+    <div className="bg-white px-3 py-1.5 rounded-full flex items-center gap-1 text-xs font-medium whitespace-nowrap">
+      <span>{emoji}</span>
+      <span>{label}</span>
+    </div>
+  )
+}
+
+function RecipeMiniCard({ title, time, color }: { title: string; time: string; color: string }) {
+  return (
+    <div className="rounded-xl p-3 mb-2 flex items-center justify-between" style={{ backgroundColor: color }}>
+      <div>
+        <p className="font-semibold text-sm">{title}</p>
+        <p className="text-xs text-gray-600">{time}</p>
+      </div>
+      <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">→</div>
+    </div>
+  )
+}
+
+function SavedRecipeItem({ title, price, image }: { title: string; price: string; image: string }) {
+  return (
+    <div className="bg-gray-50 rounded-2xl p-3 mb-3 flex items-center gap-3">
+      <div className="w-16 h-16 bg-gradient-to-br from-[#FFE5D9] to-[#FFF3D9] rounded-xl flex items-center justify-center text-2xl">
+        {image}
+      </div>
+      <div className="flex-1">
+        <p className="font-semibold text-sm">{title}</p>
+        <p className="text-xs text-[#FF6B35] font-medium">{price}</p>
+      </div>
+      <div className="text-xl">→</div>
+    </div>
+  )
+}
+
+function LogoText({ text }: { text: string }) {
+  return <div className="font-bold text-lg">{text}</div>
+}
+
+function FeatureItem({ number, title, description }: { number: string; title: string; description: string }) {
+  return (
+    <div className="flex gap-4">
+      <div className="w-10 h-10 rounded-full bg-[#FFE5D9] text-[#FF6B35] flex items-center justify-center font-bold flex-shrink-0">
+        {number}
+      </div>
+      <div>
+        <h4 className="font-bold mb-1">{title}</h4>
+        <p className="text-sm text-[#8B7E74]">{description}</p>
+      </div>
+    </div>
+  )
+}
+
+function StatBox({ value, label }: { value: string; label: string }) {
+  return (
+    <div>
+      <p className="text-3xl font-black text-[#FF6B35] mb-1">{value}</p>
+      <p className="text-sm text-[#8B7E74]">{label}</p>
+    </div>
+  )
+}
+
+function ProcessStep({ number, title, description }: { number: string; title: string; description: string }) {
+  return (
+    <div className="flex gap-4">
+      <div className="w-12 h-12 rounded-full bg-[#FF6B35] text-white flex items-center justify-center font-black text-lg flex-shrink-0">
+        {number}
+      </div>
+      <div>
+        <h4 className="font-bold text-lg mb-2">{title}</h4>
+        <p className="text-[#8B7E74]">{description}</p>
+      </div>
+    </div>
+  )
+}
+
+function NotificationCard({ icon, title, description, time }: { icon: string; title: string; description: string; time: string }) {
+  return (
+    <div className="bg-white border border-gray-100 rounded-xl p-3 mb-3 flex items-start gap-3">
+      <div className="text-2xl">{icon}</div>
+      <div className="flex-1">
+        <p className="font-semibold text-sm mb-0.5">{title}</p>
+        <p className="text-xs text-gray-600">{description}</p>
+      </div>
+      <p className="text-xs text-gray-400">{time}</p>
+    </div>
+  )
+}
+
+function TestimonialCard({ text, author, role, avatar }: { text: string; author: string; role: string; avatar: string }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="bg-[#FFF8F3] rounded-3xl p-8 border border-gray-100"
+    >
+      <p className="text-[#8B7E74] mb-6 leading-relaxed">&quot;{text}&quot;</p>
+      <div className="flex items-center gap-3">
+        <div className="w-12 h-12 bg-gradient-to-br from-[#FF6B35] to-[#FF8C42] rounded-full flex items-center justify-center text-2xl">
+          {avatar}
+        </div>
+        <div>
+          <p className="font-bold text-sm">{author}</p>
+          <p className="text-xs text-[#8B7E74]">{role}</p>
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
+function SocialIcon({ icon }: { icon: string }) {
+  return (
+    <div className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center cursor-pointer transition-colors">
+      {icon}
+    </div>
+  )
 }

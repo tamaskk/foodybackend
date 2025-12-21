@@ -5,6 +5,7 @@ export interface IUser extends Document {
   email: string;
   username: string;
   password: string;
+  country: string;
   subscriptionTier: 'free' | 'pro' | 'premium';
   subscriptionEndDate: Date | null;
   isPrivate: boolean;
@@ -13,6 +14,10 @@ export interface IUser extends Document {
   following: number;
   streak: number;
   lastActiveDate: Date | null;
+  recipes: number;
+  likes: number;
+  xp: number;
+  level: number;
   progress: {
     recipes_created: number;
     recipes_saved: number;
@@ -31,6 +36,13 @@ export interface IUser extends Document {
     dinner: string;
     snack: string;
     drink: string;
+  };
+  notifications: {
+    like: boolean;
+    comment: boolean;
+    save: boolean;
+    follow: boolean;
+    achievements: boolean;
   };
   createdAt: Date;
   updatedAt: Date;
@@ -63,6 +75,12 @@ const UserSchema: Schema = new Schema<IUser>(
       required: [true, 'Password is required'],
       minlength: [6, 'Password must be at least 6 characters'],
     },
+    country: {
+      type: String,
+      required: [true, 'Country is required'],
+      trim: true,
+      minlength: [2, 'Country must be at least 2 characters'],
+    },
     subscriptionTier: {
       type: String,
       enum: ['free', 'pro'],
@@ -81,6 +99,26 @@ const UserSchema: Schema = new Schema<IUser>(
       ref: 'Household',
       default: null,
       index: true,
+    },
+    recipes: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    likes: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    xp: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    level: {
+      type: Number,
+      default: 1,
+      min: 1,
     },
     followers: {
       type: Number,
@@ -139,6 +177,24 @@ const UserSchema: Schema = new Schema<IUser>(
         dinner: '#FFE5F3',
         snack: '#F6F4F0',
         drink: '#E8F6F5',
+      }),
+      required: true,
+      _id: false,
+    },
+    notifications: {
+      type: {
+        like: { type: Boolean, default: true },
+        comment: { type: Boolean, default: true },
+        save: { type: Boolean, default: true },
+        follow: { type: Boolean, default: true },
+        achievements: { type: Boolean, default: true },
+      },
+      default: () => ({
+        like: true,
+        comment: true,
+        save: true,
+        follow: true,
+        achievements: true,
       }),
       required: true,
       _id: false,

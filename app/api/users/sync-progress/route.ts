@@ -3,6 +3,9 @@ import connectDB from '@/lib/db';
 import User from '@/models/User';
 import Recipe from '@/models/Recipe';
 import SocialPost from '@/models/SocialPost';
+import UserAchievement from '@/models/UserAchievement';
+import { ACHIEVEMENT_DEFINITIONS } from '@/lib/achievement-definitions';
+import AchievementService from '@/services/achievement.service';
 import { verifyToken } from '@/lib/jwt';
 import mongoose from 'mongoose';
 
@@ -58,6 +61,24 @@ export async function POST(req: NextRequest) {
       commentsCreated += userComments.length;
     }
     
+    // Total likes received across this user's posts
+    const likesAgg = await SocialPost.aggregate([
+      { $match: { userId: userIdObj } },
+      { $project: { likesCount: { $size: { $ifNull: ['$likedUserIds', []] } } } },
+      { $group: { _id: null, totalLikes: { $sum: '$likesCount' } } },
+    ]);
+    const totalLikes = likesAgg.length > 0 ? likesAgg[0].totalLikes : 0;
+
+    // XP from achievements: sum xp of highest unlocked tier per achievement
+    const achievements = await UserAchievement.find({ userId: userIdObj }).lean();
+    let totalXp = 0;
+    for (const unlocked of achievements) {
+      const definition = ACHIEVEMENT_DEFINITIONS.find(a => a.id === unlocked.achievementId);
+      const tierXp = definition?.tiers.find(t => t.tier === unlocked.tier)?.xp ?? 0;
+      totalXp += tierXp;
+    }
+    const level = AchievementService.computeLevel(totalXp);
+
     // Get user for follower count
     const user = await User.findById(userIdObj);
     
@@ -77,7 +98,11 @@ export async function POST(req: NextRequest) {
             comments_created: commentsCreated,
             followers_count: user?.followers || 0,
             household_actions: 0, // Can't retroactively count
-          }
+          },
+          recipes: recipesCreated,
+          likes: totalLikes,
+          xp: totalXp,
+          level,
         }
       },
       { new: true }
@@ -93,6 +118,10 @@ export async function POST(req: NextRequest) {
         likes_given: likesGiven,
         comments_created: commentsCreated,
         followers_count: user?.followers || 0,
+        recipes: recipesCreated,
+        likes: totalLikes,
+        xp: totalXp,
+        level,
       }
     });
   } catch (error: any) {

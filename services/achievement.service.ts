@@ -13,6 +13,7 @@ import {
   getAchievementById,
   TIER_DESCRIPTIONS
 } from '@/lib/achievement-definitions';
+import { calculateLevelFromXp } from '@/lib/level-system';
 
 export class AchievementService {
   /**
@@ -110,6 +111,9 @@ export class AchievementService {
           const newTierIndex = achievement.tiers.findIndex(t => t.tier === highestUnlockedTier!.tier);
           
           if (newTierIndex > currentTierIndex) {
+            const previousTier = achievement.tiers[currentTierIndex];
+            const xpGain = this.getTierXp(achievement.id, highestUnlockedTier.tier) - this.getTierXp(achievement.id, previousTier?.tier);
+
             // Upgrade the tier
             existingAchievement.tier = highestUnlockedTier.tier;
             existingAchievement.unlockedAt = new Date();
@@ -121,6 +125,11 @@ export class AchievementService {
               tier: highestUnlockedTier.tier,
               isUpgrade: true,
             });
+
+            // Award XP for the new tier (only the delta)
+            if (xpGain > 0) {
+              await this.addXp(userIdObj, xpGain);
+            }
 
             // Send notification for upgrade
             await this.sendAchievementNotification(
@@ -145,6 +154,12 @@ export class AchievementService {
             tier: highestUnlockedTier.tier,
             isUpgrade: false,
           });
+
+            // Award XP for first unlock
+            const xpGain = this.getTierXp(achievement.id, highestUnlockedTier.tier);
+            if (xpGain > 0) {
+              await this.addXp(userIdObj, xpGain);
+            }
 
           // Send notification for new achievement
           await this.sendAchievementNotification(
@@ -290,6 +305,31 @@ export class AchievementService {
   ) {
     await this.incrementProgress(userId, actionKey, amount);
     return await this.checkAchievements(userId, actionKey);
+  }
+
+  private static getTierXp(achievementId: string, tier?: string | null): number {
+    if (!tier) return 0;
+    const achievement = getAchievementById(achievementId);
+    const tierInfo = achievement?.tiers.find(t => t.tier === tier);
+    return tierInfo?.xp ?? 0;
+  }
+
+  static computeLevel(totalXp: number): number {
+    return calculateLevelFromXp(totalXp);
+  }
+
+  private static async addXp(userId: mongoose.Types.ObjectId, amount: number) {
+    if (!amount || amount <= 0) return;
+
+    const user = await User.findById(userId).select('xp level');
+    if (!user) return;
+
+    const newXp = (user.xp || 0) + amount;
+    const newLevel = this.computeLevel(newXp);
+
+    user.xp = newXp;
+    user.level = newLevel;
+    await user.save();
   }
 }
 

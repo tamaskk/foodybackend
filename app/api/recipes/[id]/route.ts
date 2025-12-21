@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import Recipe from '@/models/Recipe';
 import mongoose from 'mongoose';
+import User from '@/models/User';
 import { verifyToken } from '@/lib/jwt';
 
 async function generateUniqueCode(): Promise<string> {
@@ -223,6 +224,10 @@ export async function DELETE(
         { status: 404 }
       );
     }
+
+    // Decrement current recipe count for the user (floor at 0)
+    await User.findByIdAndUpdate(userId, { $inc: { recipes: -1 } });
+    await User.updateOne({ _id: userId, recipes: { $lt: 0 } }, { $set: { recipes: 0 } });
 
     return NextResponse.json({
       message: 'Recipe deleted successfully',

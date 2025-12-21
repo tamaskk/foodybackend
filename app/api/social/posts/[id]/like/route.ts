@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import SocialPost from '@/models/SocialPost';
+import User from '@/models/User';
 import { verifyToken } from '@/lib/jwt';
 import mongoose from 'mongoose';
 import AchievementService from '@/services/achievement.service';
@@ -56,6 +57,10 @@ export async function POST(
         { _id: postId },
         { $set: { likedUserIds } }
       );
+
+      // Decrement author's like counter (floor at 0)
+      await User.findByIdAndUpdate(post.userId, { $inc: { likes: -1 } });
+      await User.updateOne({ _id: post.userId, likes: { $lt: 0 } }, { $set: { likes: 0 } });
       return NextResponse.json({
         liked: false,
         likes: likedUserIds.length,
@@ -67,6 +72,9 @@ export async function POST(
         { _id: postId },
         { $set: { likedUserIds } }
       );
+
+      // Increment author's like counter
+      await User.findByIdAndUpdate(post.userId, { $inc: { likes: 1 } });
       
       // Track achievement (async, don't wait for it)
       AchievementService.trackAndCheck(userId!, 'likes_given').catch(err => 

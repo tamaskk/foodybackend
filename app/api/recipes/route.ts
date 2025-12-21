@@ -197,6 +197,11 @@ export async function POST(req: NextRequest) {
       console.error('Achievement tracking error:', err)
     );
 
+    // Increment current recipe count for the user
+    await User.findByIdAndUpdate(userId, { $inc: { recipes: 1 } }).catch(err =>
+      console.error('Error incrementing user recipes count:', err)
+    );
+
     return NextResponse.json(
       {
         message: 'Recipe created successfully',

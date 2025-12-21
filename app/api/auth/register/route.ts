@@ -9,10 +9,10 @@ export async function POST(request: NextRequest) {
     await connectDB();
 
     const body = await request.json();
-    const { name, email, username, password } = body;
+    const { name, email, username, password, country } = body;
 
     // Validation
-    if (!name || !email || !username || !password) {
+    if (!name || !email || !username || !password || !country) {
       return NextResponse.json(
         { error: 'All fields are required' },
         { status: 400 }
@@ -54,10 +54,15 @@ export async function POST(request: NextRequest) {
       email: email.toLowerCase().trim(),
       username: username.toLowerCase().trim(),
       password: hashedPassword,
+      country: country.trim(),
       subscriptionTier: 'free',
       subscriptionEndDate: null,
       isPrivate: false,
       householdId: null,
+      recipes: 0,
+      likes: 0,
+      xp: 0,
+      level: 1,
       followers: 0,
       following: 0,
       streak: 0,
@@ -81,6 +86,13 @@ export async function POST(request: NextRequest) {
         snack: '#F6F4F0',
         drink: '#E8F6F5',
       },
+      notifications: {
+        like: true,
+        comment: true,
+        save: true,
+        follow: true,
+        achievements: true,
+      },
     });
 
     // Generate JWT token
@@ -99,12 +111,18 @@ export async function POST(request: NextRequest) {
         name: user.name,
         email: user.email,
         username: user.username,
+        country: user.country,
         subscriptionTier: user.subscriptionTier,
         subscriptionEndDate: user.subscriptionEndDate,
         isPrivate: user.isPrivate ?? false,
         followers: user.followers,
         following: user.following,
+        recipes: user.recipes ?? 0,
+        likes: user.likes ?? 0,
+        xp: user.xp ?? 0,
+        level: user.level ?? 1,
         recipeBackgrounds: user.recipeBackgrounds,
+        notifications: user.notifications,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
         householdId: user.householdId,
@@ -112,7 +130,6 @@ export async function POST(request: NextRequest) {
         lastActiveDate: user.lastActiveDate,
         progress: user.progress,
       },
-      userObject: user,
     };
     console.log('response', response);
     // Return user data (without password) and token

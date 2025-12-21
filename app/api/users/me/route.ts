@@ -51,6 +51,8 @@ export async function GET(req: NextRequest) {
       { $group: { _id: null, totalLikes: { $sum: '$likesCount' } } },
     ]);
     const totalLikes = agg.length > 0 ? agg[0].totalLikes : 0;
+    const recipesCount = user.recipes ?? recipes.length ?? 0;
+    const likesCount = user.likes ?? totalLikes ?? 0;
 
     return NextResponse.json({
       user: {
@@ -58,10 +60,14 @@ export async function GET(req: NextRequest) {
         name: user.name,
         email: user.email,
         username: user.username,
+        country: user.country,
         subscriptionTier: user.subscriptionTier,
         isPrivate: user.isPrivate ?? false,
         subscriptionEndDate: user.subscriptionEndDate,
-        likes: totalLikes,
+        likes: likesCount,
+        recipes: recipesCount,
+        xp: user.xp ?? 0,
+        level: user.level ?? 1,
         followers: user.followers || 0,
         following: user.following || 0,
         streak: user.streak || 0,
@@ -72,6 +78,13 @@ export async function GET(req: NextRequest) {
           dinner: '#FFE5F3',
           snack: '#F6F4F0',
           drink: '#E8F6F5',
+        },
+        notifications: user.notifications || {
+          like: true,
+          comment: true,
+          save: true,
+          follow: true,
+          achievements: true,
         },
       },
       recipes: recipes.map((r: any) => ({
