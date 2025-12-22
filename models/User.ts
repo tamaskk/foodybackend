@@ -6,6 +6,7 @@ export interface IUser extends Document {
   username: string;
   password: string;
   country: string;
+  bio: string | null;
   avatarUrl: string | null;
   subscriptionTier: 'free' | 'pro' | 'premium';
   subscriptionEndDate: Date | null;
@@ -82,6 +83,11 @@ const UserSchema: Schema = new Schema<IUser>(
       required: [true, 'Country is required'],
       trim: true,
       minlength: [2, 'Country must be at least 2 characters'],
+    },
+    bio: {
+      type: String,
+      default: null,
+      trim: true,
     },
     avatarUrl: {
       type: String,
