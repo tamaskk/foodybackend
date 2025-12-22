@@ -3,6 +3,8 @@ import { verifyToken } from '@/lib/jwt';
 import { storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { randomUUID } from 'crypto';
+import connectDB from '@/lib/db';
+import User from '@/models/User';
 
 async function authenticateRequest(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
@@ -29,6 +31,8 @@ export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
     const file = formData.get('image') as File;
+    const isProfilePictureValue = formData.get('isProfilePicture');
+    const isProfilePicture = isProfilePictureValue === 'true' || String(isProfilePictureValue) === 'true';
 
     if (!file) {
       return NextResponse.json(
@@ -57,8 +61,9 @@ export async function POST(req: NextRequest) {
 
     // Generate unique filename
     const fileExtension = file.name.split('.').pop();
+    const folder = isProfilePicture ? 'profile-pictures' : 'images';
     const fileName = `${randomUUID()}.${fileExtension}`;
-    const storageRef = ref(storage, `images/${fileName}`);
+    const storageRef = ref(storage, `${folder}/${fileName}`);
 
     // Convert File to ArrayBuffer
     const arrayBuffer = await file.arrayBuffer();
@@ -71,6 +76,18 @@ export async function POST(req: NextRequest) {
 
     // Get download URL
     const downloadURL = await getDownloadURL(storageRef);
+
+    // If it's a profile picture, save the URL to the user's profile
+    if (isProfilePicture) {
+      await connectDB();
+      const userId = auth.user!.userId;
+      
+      await User.findByIdAndUpdate(
+        userId,
+        { $set: { avatarUrl: downloadURL } },
+        { new: true }
+      );
+    }
 
     return NextResponse.json({
       success: true,

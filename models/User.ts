@@ -6,6 +6,7 @@ export interface IUser extends Document {
   username: string;
   password: string;
   country: string;
+  avatarUrl: string | null;
   subscriptionTier: 'free' | 'pro' | 'premium';
   subscriptionEndDate: Date | null;
   isPrivate: boolean;
@@ -18,6 +19,7 @@ export interface IUser extends Document {
   likes: number;
   xp: number;
   level: number;
+  imageUrl: string | null;
   progress: {
     recipes_created: number;
     recipes_saved: number;
@@ -80,6 +82,11 @@ const UserSchema: Schema = new Schema<IUser>(
       required: [true, 'Country is required'],
       trim: true,
       minlength: [2, 'Country must be at least 2 characters'],
+    },
+    avatarUrl: {
+      type: String,
+      default: null,
+      trim: true,
     },
     subscriptionTier: {
       type: String,
@@ -180,6 +187,11 @@ const UserSchema: Schema = new Schema<IUser>(
       }),
       required: true,
       _id: false,
+    },
+    imageUrl: {
+      type: String,
+      default: null,
+      trim: true,
     },
     notifications: {
       type: {

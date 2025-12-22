@@ -51,8 +51,9 @@ export async function GET(req: NextRequest) {
       { $group: { _id: null, totalLikes: { $sum: '$likesCount' } } },
     ]);
     const totalLikes = agg.length > 0 ? agg[0].totalLikes : 0;
-    const recipesCount = user.recipes ?? recipes.length ?? 0;
+
     const likesCount = user.likes ?? totalLikes ?? 0;
+    const recipesCount = recipes.length;
 
     return NextResponse.json({
       user: {
@@ -61,6 +62,7 @@ export async function GET(req: NextRequest) {
         email: user.email,
         username: user.username,
         country: user.country,
+        avatarUrl: user.avatarUrl || null,
         subscriptionTier: user.subscriptionTier,
         isPrivate: user.isPrivate ?? false,
         subscriptionEndDate: user.subscriptionEndDate,
@@ -71,7 +73,7 @@ export async function GET(req: NextRequest) {
         followers: user.followers || 0,
         following: user.following || 0,
         streak: user.streak || 0,
-        bio: 'Home cook sharing quick, cozy recipes.',
+        bio: user.bio || 'Home cook sharing quick, cozy recipes.',
         recipeBackgrounds: user.recipeBackgrounds || {
           breakfast: '#FFF3D9',
           lunch: '#DDF6FF',
@@ -103,3 +105,59 @@ export async function GET(req: NextRequest) {
   }
 }
 
+// PATCH /api/users/me - Update current user's profile
+export async function PATCH(req: NextRequest) {
+  const auth = await authenticateRequest(req);
+  if (auth.error) return auth.error;
+
+  try {
+    await connectDB();
+    const userId = auth.user!.userId;
+    const body = await req.json();
+
+    const updateFields: any = {};
+    if (body.name !== undefined) updateFields.name = body.name.trim();
+    if (body.username !== undefined) {
+      const trimmedUsername = body.username.trim();
+      // Remove @ if user added it
+      const cleanUsername = trimmedUsername.startsWith('@') ? trimmedUsername.substring(1) : trimmedUsername;
+      updateFields.username = cleanUsername;
+    }
+    if (body.bio !== undefined) updateFields.bio = body.bio.trim();
+    if (body.avatarUrl !== undefined) updateFields.avatarUrl = body.avatarUrl;
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $set: updateFields },
+      { new: true, select: '-password' }
+    ).lean();
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      user: {
+        id: user._id.toString(),
+        name: user.name,
+        username: user.username,
+        bio: user.bio,
+        avatarUrl: user.avatarUrl || null,
+      },
+    });
+  } catch (error: any) {
+    console.error('Update profile error:', error);
+    if (error.code === 11000) {
+      // Duplicate key error (username already exists)
+      return NextResponse.json(
+        { error: 'Username already taken' },
+        { status: 400 }
+      );
+    }
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
