@@ -60,9 +60,17 @@ export async function PATCH(
     if (body.name !== undefined) updateFields.name = body.name;
     if (body.email !== undefined) updateFields.email = body.email;
     if (body.username !== undefined) updateFields.username = body.username;
+    if (body.country !== undefined) updateFields.country = body.country;
+    if (body.bio !== undefined) updateFields.bio = body.bio;
+    if (body.avatarUrl !== undefined) updateFields.avatarUrl = body.avatarUrl;
     if (body.subscriptionTier !== undefined) updateFields.subscriptionTier = body.subscriptionTier;
     if (body.subscriptionEndDate !== undefined) updateFields.subscriptionEndDate = body.subscriptionEndDate;
     if (body.isPrivate !== undefined) updateFields.isPrivate = body.isPrivate;
+    if (body.level !== undefined) updateFields.level = body.level;
+    if (body.xp !== undefined) updateFields.xp = body.xp;
+    if (body.followers !== undefined) updateFields.followers = body.followers;
+    if (body.following !== undefined) updateFields.following = body.following;
+    if (body.streak !== undefined) updateFields.streak = body.streak;
 
     const user = await User.findByIdAndUpdate(
       id,
@@ -81,9 +89,17 @@ export async function PATCH(
         name: user.name,
         email: user.email,
         username: user.username,
+        country: user.country,
+        bio: user.bio,
+        avatarUrl: user.avatarUrl,
         subscriptionTier: user.subscriptionTier,
         subscriptionEndDate: user.subscriptionEndDate,
         isPrivate: user.isPrivate,
+        level: user.level,
+        xp: user.xp,
+        followers: user.followers,
+        following: user.following,
+        streak: user.streak,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       },

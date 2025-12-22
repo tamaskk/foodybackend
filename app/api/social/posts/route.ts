@@ -195,9 +195,10 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { title, body: postBody, imageColor, imageUrls, isPoll, pollOptions, recipeId } = body;
 
-    if (!title || !postBody) {
+    // Only require title (the main post content)
+    if (!title || title.trim() === '') {
       return NextResponse.json(
-        { error: 'Title and body are required' },
+        { error: 'Post content is required' },
         { status: 400 }
       );
     }
@@ -220,7 +221,7 @@ export async function POST(req: NextRequest) {
       userId,
       recipeId: recipeId || undefined,
       title: title.trim(),
-      body: postBody.trim(),
+      body: postBody ? postBody.trim() : '',
       imageColor: imageColor || '#FFF3D0',
       imageUrl: firstImageUrl,
       imageUrls: imageUrlsArray,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface Stats {
@@ -15,9 +15,17 @@ interface User {
   name: string;
   email: string;
   username: string;
+  country?: string;
+  bio?: string | null;
+  avatarUrl?: string | null;
   subscriptionTier: string;
   subscriptionEndDate: string | null;
   isPrivate: boolean;
+  level?: number;
+  xp?: number;
+  followers?: number;
+  following?: number;
+  streak?: number;
   createdAt: string;
 }
 
@@ -25,10 +33,27 @@ interface Post {
   id: string;
   title: string;
   body: string;
+  imageColor?: string;
+  imageUrl?: string;
+  isPoll?: boolean;
+  pollOptions?: string[];
   likesCount: number;
   commentsCount: number;
   savesCount: number;
-  user: { id: string; name: string; username: string } | null;
+  user: { id: string; name: string; username: string; avatarUrl?: string } | null;
+  likedUsers?: Array<{
+    id: string;
+    name: string;
+    username: string;
+    avatarUrl?: string;
+  }>;
+  comments?: Array<{
+    id: string;
+    text: string;
+    likes: number;
+    user: { id: string; name: string; username: string; avatarUrl?: string } | null;
+    createdAt: string;
+  }>;
   createdAt: string;
 }
 
@@ -258,9 +283,33 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleEdit = (type: string, item: any) => {
-    setEditingItem({ type, ...item });
-    setEditFormData({ ...item });
+  const handleEdit = async (type: string, item: any) => {
+    // For posts, fetch full details including likedUsers
+    if (type === 'posts') {
+      try {
+        const response = await fetch(`/api/admin/posts/${item.id}`, {
+          headers: getAuthHeaders(),
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setEditingItem({ type, ...data.post });
+          setEditFormData({ ...data.post });
+        } else {
+          // Fallback to using the list data
+          setEditingItem({ type, ...item });
+          setEditFormData({ ...item });
+        }
+      } catch (error) {
+        console.error('Failed to fetch post details:', error);
+        // Fallback to using the list data
+        setEditingItem({ type, ...item });
+        setEditFormData({ ...item });
+      }
+    } else {
+      setEditingItem({ type, ...item });
+      setEditFormData({ ...item });
+    }
   };
 
   const handleUpdate = async () => {
@@ -558,7 +607,17 @@ export default function AdminDashboard() {
         {/* Users Table with Pagination */}
         {activeTab === 'users' && (
           <>
-            <UserTable users={users} loading={loading} onEdit={handleEdit} onDelete={handleDelete} />
+            <UserTable 
+              users={users} 
+              loading={loading} 
+              onEdit={handleEdit} 
+              onDelete={handleDelete}
+              editingItem={editingItem}
+              editFormData={editFormData}
+              setEditFormData={setEditFormData}
+              onSave={handleUpdate}
+              onCancelEdit={() => { setEditingItem(null); setEditFormData({}); }}
+            />
             <Paginator pagination={usersPagination} onPageChange={(page) => changePage('users', page)} />
           </>
         )}
@@ -566,7 +625,17 @@ export default function AdminDashboard() {
         {/* Posts Table with Pagination */}
         {activeTab === 'posts' && (
           <>
-            <PostTable posts={posts} loading={loading} onEdit={handleEdit} onDelete={handleDelete} />
+            <PostTable 
+              posts={posts} 
+              loading={loading} 
+              onEdit={handleEdit} 
+              onDelete={handleDelete}
+              editingItem={editingItem}
+              editFormData={editFormData}
+              setEditFormData={setEditFormData}
+              onSave={handleUpdate}
+              onCancelEdit={() => { setEditingItem(null); setEditFormData({}); }}
+            />
             <Paginator pagination={postsPagination} onPageChange={(page) => changePage('posts', page)} />
           </>
         )}
@@ -574,7 +643,17 @@ export default function AdminDashboard() {
         {/* Recipes Table with Pagination */}
         {activeTab === 'recipes' && (
           <>
-            <RecipeTable recipes={recipes} loading={loading} onEdit={handleEdit} onDelete={handleDelete} />
+            <RecipeTable 
+              recipes={recipes} 
+              loading={loading} 
+              onEdit={handleEdit} 
+              onDelete={handleDelete}
+              editingItem={editingItem}
+              editFormData={editFormData}
+              setEditFormData={setEditFormData}
+              onSave={handleUpdate}
+              onCancelEdit={() => { setEditingItem(null); setEditFormData({}); }}
+            />
             <Paginator pagination={recipesPagination} onPageChange={(page) => changePage('recipes', page)} />
           </>
         )}
@@ -588,16 +667,6 @@ export default function AdminDashboard() {
         )}
       </main>
 
-      {/* Edit Modal */}
-      {editingItem && (
-        <EditModal
-          item={editingItem}
-          formData={editFormData}
-          setFormData={setEditFormData}
-          onClose={() => { setEditingItem(null); setEditFormData({}); }}
-          onSave={handleUpdate}
-        />
-      )}
 
       {/* Send Notification Modal */}
       {showNotificationForm && (
@@ -707,7 +776,7 @@ function Paginator({ pagination, onPageChange }: { pagination: Pagination; onPag
 }
 
 // Component: UserTable
-function UserTable({ users, loading, onEdit, onDelete }: any) {
+function UserTable({ users, loading, onEdit, onDelete, editingItem, editFormData, setEditFormData, onSave, onCancelEdit }: any) {
   return (
     <div className="bg-white shadow rounded-lg overflow-hidden">
       <table className="min-w-full divide-y divide-gray-200">
@@ -721,7 +790,7 @@ function UserTable({ users, loading, onEdit, onDelete }: any) {
             <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Actions</th>
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        <tbody className="bg-white">
           {loading ? (
             <tr>
               <td colSpan={6} className="px-6 py-4 text-center text-gray-900">Loading...</td>
@@ -732,43 +801,238 @@ function UserTable({ users, loading, onEdit, onDelete }: any) {
             </tr>
           ) : (
             users.map((user: User) => (
-              <tr key={user.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-900 font-medium">{user.name}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-900">{user.email}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-900">{user.username}</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                    user.subscriptionTier === 'free' ? 'bg-gray-200 text-gray-800' : 'bg-green-200 text-green-800'
-                  }`}>
-                    {user.subscriptionTier}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-lg">{user.isPrivate ? '🔒' : '🌐'}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  <button
-                    onClick={() => onEdit('users', user)}
-                    className="text-blue-600 hover:text-blue-900 mr-3 font-semibold"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => onDelete('users', user.id)}
-                    className="text-red-600 hover:text-red-900 font-semibold"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
+              <React.Fragment key={user.id}>
+                <tr className="border-b border-gray-200 hover:bg-gray-50 transition">
+                  <td className="px-6 py-4 whitespace-nowrap text-gray-900 font-medium">{user.name}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-gray-900">{user.email}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-gray-900">{user.username}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                      user.subscriptionTier === 'free' ? 'bg-gray-200 text-gray-800' : 'bg-green-200 text-green-800'
+                    }`}>
+                      {user.subscriptionTier}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-lg">{user.isPrivate ? '🔒' : '🌐'}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <button
+                      onClick={() => onEdit('users', user)}
+                      className="text-blue-600 hover:text-blue-900 mr-3 font-semibold"
+                    >
+                      {editingItem?.id === user.id ? '−' : 'Edit'}
+                    </button>
+                    <button
+                      onClick={() => onDelete('users', user.id)}
+                      className="text-red-600 hover:text-red-900 font-semibold"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+                
+                {/* Expandable Edit Form */}
+                {editingItem?.id === user.id && (
+                  <tr>
+                    <td colSpan={6} className="p-0">
+                      <div className="bg-gray-50 border-t-2 border-blue-500 animate-expandDown">
+                        <div className="px-8 py-6">
+                          <div className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div>
+                                <label className="block text-sm font-semibold mb-2 text-gray-900">Name</label>
+                                <input
+                                  type="text"
+                                  value={editFormData.name || ''}
+                                  onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                  placeholder="Enter name"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-semibold mb-2 text-gray-900">Email</label>
+                                <input
+                                  type="email"
+                                  value={editFormData.email || ''}
+                                  onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
+                                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                  placeholder="Enter email"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div>
+                                <label className="block text-sm font-semibold mb-2 text-gray-900">Username</label>
+                                <input
+                                  type="text"
+                                  value={editFormData.username || ''}
+                                  onChange={(e) => setEditFormData({ ...editFormData, username: e.target.value })}
+                                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                  placeholder="Enter username"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-semibold mb-2 text-gray-900">Country</label>
+                                <input
+                                  type="text"
+                                  value={editFormData.country || ''}
+                                  onChange={(e) => setEditFormData({ ...editFormData, country: e.target.value })}
+                                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                  placeholder="Enter country"
+                                />
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-semibold mb-2 text-gray-900">Bio</label>
+                              <textarea
+                                value={editFormData.bio || ''}
+                                onChange={(e) => setEditFormData({ ...editFormData, bio: e.target.value })}
+                                rows={3}
+                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                placeholder="Enter bio"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-semibold mb-2 text-gray-900">Avatar URL</label>
+                              <input
+                                type="url"
+                                value={editFormData.avatarUrl || ''}
+                                onChange={(e) => setEditFormData({ ...editFormData, avatarUrl: e.target.value })}
+                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                placeholder="Enter avatar URL"
+                              />
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              <div>
+                                <label className="block text-sm font-semibold mb-2 text-gray-900">Subscription Tier</label>
+                                <select
+                                  value={editFormData.subscriptionTier || 'free'}
+                                  onChange={(e) => setEditFormData({ ...editFormData, subscriptionTier: e.target.value })}
+                                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                >
+                                  <option value="free">Free</option>
+                                  <option value="pro">Pro</option>
+                                </select>
+                              </div>
+                              <div>
+                                <label className="block text-sm font-semibold mb-2 text-gray-900">Level</label>
+                                <input
+                                  type="number"
+                                  value={editFormData.level || 1}
+                                  onChange={(e) => setEditFormData({ ...editFormData, level: parseInt(e.target.value) || 1 })}
+                                  min="1"
+                                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-semibold mb-2 text-gray-900">XP</label>
+                                <input
+                                  type="number"
+                                  value={editFormData.xp || 0}
+                                  onChange={(e) => setEditFormData({ ...editFormData, xp: parseInt(e.target.value) || 0 })}
+                                  min="0"
+                                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              <div>
+                                <label className="block text-sm font-semibold mb-2 text-gray-900">Followers</label>
+                                <input
+                                  type="number"
+                                  value={editFormData.followers || 0}
+                                  onChange={(e) => setEditFormData({ ...editFormData, followers: parseInt(e.target.value) || 0 })}
+                                  min="0"
+                                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-semibold mb-2 text-gray-900">Following</label>
+                                <input
+                                  type="number"
+                                  value={editFormData.following || 0}
+                                  onChange={(e) => setEditFormData({ ...editFormData, following: parseInt(e.target.value) || 0 })}
+                                  min="0"
+                                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-semibold mb-2 text-gray-900">Streak</label>
+                                <input
+                                  type="number"
+                                  value={editFormData.streak || 0}
+                                  onChange={(e) => setEditFormData({ ...editFormData, streak: parseInt(e.target.value) || 0 })}
+                                  min="0"
+                                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="flex items-center space-x-6 bg-white p-4 rounded-lg border border-gray-200">
+                              <label className="flex items-center text-gray-900 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={editFormData.isPrivate || false}
+                                  onChange={(e) => setEditFormData({ ...editFormData, isPrivate: e.target.checked })}
+                                  className="mr-3 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                />
+                                <span className="font-semibold">Private Account</span>
+                              </label>
+                            </div>
+
+                            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                              <button
+                                onClick={onCancelEdit}
+                                className="px-6 py-2.5 border-2 border-gray-300 rounded-lg hover:bg-gray-100 text-gray-900 font-semibold transition"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={onSave}
+                                className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition shadow-lg hover:shadow-xl"
+                              >
+                                Save Changes
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
             ))
           )}
         </tbody>
       </table>
+      
+      <style jsx>{`
+        @keyframes expandDown {
+          from {
+            opacity: 0;
+            max-height: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            max-height: 2000px;
+            transform: translateY(0);
+          }
+        }
+        .animate-expandDown {
+          animation: expandDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+      `}</style>
     </div>
   );
 }
 
 // Component: PostTable
-function PostTable({ posts, loading, onEdit, onDelete }: any) {
+function PostTable({ posts, loading, onEdit, onDelete, editingItem, editFormData, setEditFormData, onSave, onCancelEdit }: any) {
   return (
     <div className="bg-white shadow rounded-lg overflow-hidden">
       <table className="min-w-full divide-y divide-gray-200">
@@ -782,7 +1046,7 @@ function PostTable({ posts, loading, onEdit, onDelete }: any) {
             <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Actions</th>
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        <tbody className="bg-white">
           {loading ? (
             <tr>
               <td colSpan={6} className="px-6 py-4 text-center text-gray-900">Loading...</td>
@@ -793,39 +1057,281 @@ function PostTable({ posts, loading, onEdit, onDelete }: any) {
             </tr>
           ) : (
             posts.map((post: Post) => (
-              <tr key={post.id}>
-                <td className="px-6 py-4 text-gray-900 font-medium max-w-xs truncate">{post.title}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-900">{post.user?.name || 'Unknown'}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-900">{post.likesCount}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-900">{post.commentsCount}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-900">
-                  {new Date(post.createdAt).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  <button
-                    onClick={() => onEdit('posts', post)}
-                    className="text-blue-600 hover:text-blue-900 mr-3 font-semibold"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => onDelete('posts', post.id)}
-                    className="text-red-600 hover:text-red-900 font-semibold"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
+              <React.Fragment key={post.id}>
+                <tr className="border-b border-gray-200 hover:bg-gray-50 transition">
+                  <td className="px-6 py-4 text-gray-900 font-medium max-w-xs truncate">{post.title}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-gray-900">{post.user?.name || 'Unknown'}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-gray-900">{post.likesCount}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-gray-900">{post.commentsCount}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-gray-900">
+                    {new Date(post.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <button
+                      onClick={() => onEdit('posts', post)}
+                      className="text-blue-600 hover:text-blue-900 mr-3 font-semibold"
+                    >
+                      {editingItem?.id === post.id ? '−' : 'Edit'}
+                    </button>
+                    <button
+                      onClick={() => onDelete('posts', post.id)}
+                      className="text-red-600 hover:text-red-900 font-semibold"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+                
+                {/* Expandable Edit Form */}
+                {editingItem?.id === post.id && (
+                  <tr>
+                    <td colSpan={6} className="p-0">
+                      <div className="bg-gray-50 border-t-2 border-blue-500 animate-expandDown">
+                        <div className="px-8 py-6">
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {/* Left side - Edit Form */}
+                            <div className="space-y-6">
+                              <div>
+                                <label className="block text-sm font-semibold mb-2 text-gray-900">Post Content</label>
+                                <textarea
+                                  value={editFormData.title || ''}
+                                  onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
+                                  rows={4}
+                                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                  placeholder="Enter post content"
+                                />
+                              </div>
+
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <label className="block text-sm font-semibold mb-2 text-gray-900">Image Color</label>
+                                  <input
+                                    type="color"
+                                    value={editFormData.imageColor || '#FFF3D0'}
+                                    onChange={(e) => setEditFormData({ ...editFormData, imageColor: e.target.value })}
+                                    className="w-full h-10 px-2 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-semibold mb-2 text-gray-900">Image URL</label>
+                                  <input
+                                    type="url"
+                                    value={editFormData.imageUrl || ''}
+                                    onChange={(e) => setEditFormData({ ...editFormData, imageUrl: e.target.value })}
+                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                    placeholder="Enter image URL"
+                                  />
+                                </div>
+                              </div>
+
+                              <div>
+                                <div className="flex items-center space-x-6 bg-white p-4 rounded-lg border border-gray-200">
+                                  <label className="flex items-center text-gray-900 cursor-pointer">
+                                    <input
+                                      type="checkbox"
+                                      checked={editFormData.isPoll || false}
+                                      onChange={(e) => setEditFormData({ ...editFormData, isPoll: e.target.checked })}
+                                      className="mr-3 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                    />
+                                    <span className="font-semibold">Is Poll</span>
+                                  </label>
+                                </div>
+                              </div>
+
+                              {editFormData.isPoll && (
+                                <div>
+                                  <div className="flex items-center justify-between mb-2">
+                                    <label className="block text-sm font-semibold text-gray-900">Poll Options</label>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const pollOptions = editFormData.pollOptions || [];
+                                        setEditFormData({ 
+                                          ...editFormData, 
+                                          pollOptions: [...pollOptions, '']
+                                        });
+                                      }}
+                                      className="px-3 py-1 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 font-semibold transition"
+                                    >
+                                      + Add Option
+                                    </button>
+                                  </div>
+                                  <div className="space-y-2">
+                                    {(editFormData.pollOptions || []).map((option: string, index: number) => (
+                                      <div key={index} className="flex gap-2">
+                                        <input
+                                          type="text"
+                                          value={option}
+                                          onChange={(e) => {
+                                            const newOptions = [...(editFormData.pollOptions || [])];
+                                            newOptions[index] = e.target.value;
+                                            setEditFormData({ ...editFormData, pollOptions: newOptions });
+                                          }}
+                                          className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                          placeholder={`Option ${index + 1}`}
+                                        />
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            const newOptions = (editFormData.pollOptions || []).filter((_: any, i: number) => i !== index);
+                                            setEditFormData({ ...editFormData, pollOptions: newOptions });
+                                          }}
+                                          className="px-3 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold transition"
+                                        >
+                                          ✕
+                                        </button>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Right side - Preview */}
+                            <div>
+                              <h3 className="text-lg font-bold mb-4 text-gray-900">Post Preview</h3>
+                              <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
+                                {/* Post Header */}
+                                <div className="p-4 flex items-center gap-3 border-b border-gray-100">
+                                  <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
+                                    {editingItem?.user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                                  </div>
+                                  <div>
+                                    <p className="font-bold text-gray-900">{editingItem?.user?.name || 'Unknown User'}</p>
+                                    <p className="text-xs text-gray-500">{new Date().toLocaleDateString()}</p>
+                                  </div>
+                                </div>
+
+                                {/* Post Content */}
+                                <div className="p-4">
+                                  <p className="text-gray-900 whitespace-pre-wrap">{editFormData.title || 'No content'}</p>
+                                </div>
+
+                                {/* Post Image */}
+                                {(editFormData.imageUrl || editFormData.imageColor) && (
+                                  <div 
+                                    className="w-full h-48 flex items-center justify-center"
+                                    style={{ 
+                                      backgroundColor: editFormData.imageUrl ? 'transparent' : (editFormData.imageColor || '#FFF3D0'),
+                                      backgroundImage: editFormData.imageUrl ? `url(${editFormData.imageUrl})` : 'none',
+                                      backgroundSize: 'cover',
+                                      backgroundPosition: 'center'
+                                    }}
+                                  >
+                                    {!editFormData.imageUrl && (
+                                      <span className="text-gray-400 text-sm">Image Preview</span>
+                                    )}
+                                  </div>
+                                )}
+
+                                {/* Poll Preview */}
+                                {editFormData.isPoll && (editFormData.pollOptions || []).length > 0 && (
+                                  <div className="p-4 space-y-2">
+                                    {(editFormData.pollOptions || []).map((option: string, index: number) => (
+                                      <div key={index} className="border-2 border-gray-300 rounded-lg p-3 text-gray-700 font-medium">
+                                        {option || `Option ${index + 1}`}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+
+                                {/* Post Stats */}
+                                <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between text-sm text-gray-600">
+                                  <span>❤️ {editingItem?.likesCount || 0} likes</span>
+                                  <span>💬 {editingItem?.commentsCount || 0} comments</span>
+                                </div>
+
+                                {/* Liked Users Preview */}
+                                {editingItem?.likedUsers && editingItem.likedUsers.length > 0 && (
+                                  <div className="border-t border-gray-100">
+                                    <div className="p-4 space-y-3">
+                                      <p className="font-semibold text-gray-900">Liked by ({editingItem.likedUsers.length})</p>
+                                      <div className="flex flex-wrap gap-2">
+                                        {editingItem.likedUsers.map((user: any) => (
+                                          <div key={user.id} className="flex items-center gap-2 bg-gray-100 rounded-full px-3 py-1.5">
+                                            <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">
+                                              {user.name?.charAt(0)?.toUpperCase() || 'U'}
+                                            </div>
+                                            <span className="text-sm text-gray-900 font-medium">{user.name}</span>
+                                            <span className="text-xs text-gray-500">@{user.username}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Comments Preview */}
+                                {editingItem?.comments && editingItem.comments.length > 0 && (
+                                  <div className="border-t border-gray-100 max-h-60 overflow-y-auto">
+                                    <div className="p-4 space-y-3">
+                                      <p className="font-semibold text-gray-900">Comments ({editingItem.comments.length})</p>
+                                      {editingItem.comments.map((comment: any, index: number) => (
+                                        <div key={index} className="flex gap-2 border-l-2 border-blue-200 pl-3">
+                                          <div className="flex-1">
+                                            <p className="font-semibold text-sm text-gray-900">{comment.user?.name || 'User'}</p>
+                                            <p className="text-sm text-gray-700">{comment.text}</p>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                              ❤️ {comment.likes || 0} · {new Date(comment.createdAt).toLocaleDateString()}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 mt-6">
+                            <button
+                              onClick={onCancelEdit}
+                              className="px-6 py-2.5 border-2 border-gray-300 rounded-lg hover:bg-gray-100 text-gray-900 font-semibold transition"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={onSave}
+                              className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition shadow-lg hover:shadow-xl"
+                            >
+                              Save Changes
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
             ))
           )}
         </tbody>
       </table>
+      
+      <style jsx>{`
+        @keyframes expandDown {
+          from {
+            opacity: 0;
+            max-height: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            max-height: 2000px;
+            transform: translateY(0);
+          }
+        }
+        .animate-expandDown {
+          animation: expandDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+      `}</style>
     </div>
   );
 }
 
 // Component: RecipeTable
-function RecipeTable({ recipes, loading, onEdit, onDelete }: any) {
+function RecipeTable({ recipes, loading, onEdit, onDelete, editingItem, editFormData, setEditFormData, onSave, onCancelEdit }: any) {
   return (
     <div className="bg-white shadow rounded-lg overflow-hidden">
       <table className="min-w-full divide-y divide-gray-200">
@@ -839,7 +1345,7 @@ function RecipeTable({ recipes, loading, onEdit, onDelete }: any) {
             <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Actions</th>
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        <tbody className="bg-white">
           {loading ? (
             <tr>
               <td colSpan={6} className="px-6 py-4 text-center text-gray-900">Loading...</td>
@@ -850,33 +1356,357 @@ function RecipeTable({ recipes, loading, onEdit, onDelete }: any) {
             </tr>
           ) : (
             recipes.map((recipe: Recipe) => (
-              <tr key={recipe.id}>
-                <td className="px-6 py-4 text-gray-900 font-medium max-w-xs truncate">{recipe.title}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-900">{recipe.user?.name || 'Unknown'}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-900">{recipe.type}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-900">{recipe.time}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-900">
-                  {new Date(recipe.createdAt).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  <button
-                    onClick={() => onEdit('recipes', recipe)}
-                    className="text-blue-600 hover:text-blue-900 mr-3 font-semibold"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => onDelete('recipes', recipe.id)}
-                    className="text-red-600 hover:text-red-900 font-semibold"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
+              <React.Fragment key={recipe.id}>
+                <tr className="border-b border-gray-200 hover:bg-gray-50 transition">
+                  <td className="px-6 py-4 text-gray-900 font-medium max-w-xs truncate">{recipe.title}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-gray-900">{recipe.user?.name || 'Unknown'}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-gray-900">{recipe.type}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-gray-900">{recipe.time}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-gray-900">
+                    {new Date(recipe.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <button
+                      onClick={() => onEdit('recipes', recipe)}
+                      className="text-blue-600 hover:text-blue-900 mr-3 font-semibold"
+                    >
+                      {editingItem?.id === recipe.id ? '−' : 'Edit'}
+                    </button>
+                    <button
+                      onClick={() => onDelete('recipes', recipe.id)}
+                      className="text-red-600 hover:text-red-900 font-semibold"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+                
+                {/* Expandable Edit Form */}
+                {editingItem?.id === recipe.id && (
+                  <tr>
+                    <td colSpan={6} className="p-0">
+                      <div className="bg-gray-50 border-t-2 border-blue-500 animate-expandDown">
+                        <div className="px-8 py-6">
+                          <div className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div>
+                                <label className="block text-sm font-semibold mb-2 text-gray-900">Title</label>
+                                <input
+                                  type="text"
+                                  value={editFormData.title || ''}
+                                  onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
+                                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                  placeholder="Enter title"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-semibold mb-2 text-gray-900">Recipe Code</label>
+                                <input
+                                  type="text"
+                                  value={editFormData.code || ''}
+                                  onChange={(e) => setEditFormData({ ...editFormData, code: e.target.value })}
+                                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                  placeholder="5-digit code"
+                                  maxLength={5}
+                                />
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-semibold mb-2 text-gray-900">Description</label>
+                              <textarea
+                                value={editFormData.description || ''}
+                                onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+                                rows={3}
+                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                placeholder="Enter description"
+                              />
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              <div>
+                                <label className="block text-sm font-semibold mb-2 text-gray-900">Type</label>
+                                <select
+                                  value={editFormData.type || 'breakfast'}
+                                  onChange={(e) => setEditFormData({ ...editFormData, type: e.target.value })}
+                                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                >
+                                  <option value="breakfast">Breakfast</option>
+                                  <option value="lunch">Lunch</option>
+                                  <option value="dinner">Dinner</option>
+                                  <option value="snack">Snack</option>
+                                  <option value="drink">Drink</option>
+                                </select>
+                              </div>
+                              <div>
+                                <label className="block text-sm font-semibold mb-2 text-gray-900">Time</label>
+                                <input
+                                  type="text"
+                                  value={editFormData.time || ''}
+                                  onChange={(e) => setEditFormData({ ...editFormData, time: e.target.value })}
+                                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                  placeholder="e.g., 30 min"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-semibold mb-2 text-gray-900">Calories</label>
+                                <input
+                                  type="text"
+                                  value={editFormData.kcal || ''}
+                                  onChange={(e) => setEditFormData({ ...editFormData, kcal: e.target.value })}
+                                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                  placeholder="e.g., 350 kcal"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div>
+                                <label className="block text-sm font-semibold mb-2 text-gray-900">Picture Type</label>
+                                <select
+                                  value={editFormData.picture?.type || 'emoji'}
+                                  onChange={(e) => setEditFormData({ 
+                                    ...editFormData, 
+                                    picture: { ...editFormData.picture, type: e.target.value }
+                                  })}
+                                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                >
+                                  <option value="emoji">Emoji</option>
+                                  <option value="color">Color</option>
+                                  <option value="image">Image</option>
+                                </select>
+                              </div>
+                              <div>
+                                <label className="block text-sm font-semibold mb-2 text-gray-900">Picture Value</label>
+                                <input
+                                  type="text"
+                                  value={editFormData.picture?.value || ''}
+                                  onChange={(e) => setEditFormData({ 
+                                    ...editFormData, 
+                                    picture: { ...editFormData.picture, value: e.target.value }
+                                  })}
+                                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                  placeholder="Emoji, color code, or URL"
+                                />
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-semibold mb-2 text-gray-900">Image URL</label>
+                              <input
+                                type="url"
+                                value={editFormData.image || ''}
+                                onChange={(e) => setEditFormData({ ...editFormData, image: e.target.value })}
+                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                placeholder="Enter image URL"
+                              />
+                            </div>
+
+                            <div>
+                              <div className="flex items-center justify-between mb-2">
+                                <label className="block text-sm font-semibold text-gray-900">Ingredients</label>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const ingredients = editFormData.ingredients || [];
+                                    setEditFormData({ 
+                                      ...editFormData, 
+                                      ingredients: [...ingredients, '']
+                                    });
+                                  }}
+                                  className="px-3 py-1 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 font-semibold transition"
+                                >
+                                  + Add Ingredient
+                                </button>
+                              </div>
+                              <div className="space-y-2">
+                                {(editFormData.ingredients || []).map((ingredient: string, index: number) => (
+                                  <div key={index} className="flex gap-2">
+                                    <input
+                                      type="text"
+                                      value={ingredient}
+                                      onChange={(e) => {
+                                        const newIngredients = [...(editFormData.ingredients || [])];
+                                        newIngredients[index] = e.target.value;
+                                        setEditFormData({ ...editFormData, ingredients: newIngredients });
+                                      }}
+                                      className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                      placeholder={`Ingredient ${index + 1}`}
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const newIngredients = (editFormData.ingredients || []).filter((_: any, i: number) => i !== index);
+                                        setEditFormData({ ...editFormData, ingredients: newIngredients });
+                                      }}
+                                      className="px-3 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold transition"
+                                    >
+                                      ✕
+                                    </button>
+                                  </div>
+                                ))}
+                                {(!editFormData.ingredients || editFormData.ingredients.length === 0) && (
+                                  <p className="text-gray-500 text-sm italic">No ingredients added yet. Click "Add Ingredient" to start.</p>
+                                )}
+                              </div>
+                            </div>
+
+                            <div>
+                              <div className="flex items-center justify-between mb-2">
+                                <label className="block text-sm font-semibold text-gray-900">Steps</label>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const steps = editFormData.steps || [];
+                                    setEditFormData({ 
+                                      ...editFormData, 
+                                      steps: [...steps, '']
+                                    });
+                                  }}
+                                  className="px-3 py-1 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 font-semibold transition"
+                                >
+                                  + Add Step
+                                </button>
+                              </div>
+                              <div className="space-y-2">
+                                {(editFormData.steps || []).map((step: string, index: number) => (
+                                  <div key={index} className="flex gap-2">
+                                    <div className="flex items-center justify-center w-8 h-10 bg-blue-100 text-blue-800 rounded-lg font-bold text-sm">
+                                      {index + 1}
+                                    </div>
+                                    <textarea
+                                      value={step}
+                                      onChange={(e) => {
+                                        const newSteps = [...(editFormData.steps || [])];
+                                        newSteps[index] = e.target.value;
+                                        setEditFormData({ ...editFormData, steps: newSteps });
+                                      }}
+                                      rows={2}
+                                      className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none"
+                                      placeholder={`Step ${index + 1}`}
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const newSteps = (editFormData.steps || []).filter((_: any, i: number) => i !== index);
+                                        setEditFormData({ ...editFormData, steps: newSteps });
+                                      }}
+                                      className="px-3 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold transition self-start"
+                                    >
+                                      ✕
+                                    </button>
+                                  </div>
+                                ))}
+                                {(!editFormData.steps || editFormData.steps.length === 0) && (
+                                  <p className="text-gray-500 text-sm italic">No steps added yet. Click "Add Step" to start.</p>
+                                )}
+                              </div>
+                            </div>
+
+                            <div>
+                              <div className="flex items-center justify-between mb-2">
+                                <label className="block text-sm font-semibold text-gray-900">Links</label>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const links = editFormData.links || [];
+                                    setEditFormData({ 
+                                      ...editFormData, 
+                                      links: [...links, '']
+                                    });
+                                  }}
+                                  className="px-3 py-1 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 font-semibold transition"
+                                >
+                                  + Add Link
+                                </button>
+                              </div>
+                              <div className="space-y-2">
+                                {(editFormData.links || []).map((link: string, index: number) => (
+                                  <div key={index} className="flex gap-2">
+                                    <input
+                                      type="url"
+                                      value={link}
+                                      onChange={(e) => {
+                                        const newLinks = [...(editFormData.links || [])];
+                                        newLinks[index] = e.target.value;
+                                        setEditFormData({ ...editFormData, links: newLinks });
+                                      }}
+                                      className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                                      placeholder={`Link ${index + 1}`}
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const newLinks = (editFormData.links || []).filter((_: any, i: number) => i !== index);
+                                        setEditFormData({ ...editFormData, links: newLinks });
+                                      }}
+                                      className="px-3 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold transition"
+                                    >
+                                      ✕
+                                    </button>
+                                  </div>
+                                ))}
+                                {(!editFormData.links || editFormData.links.length === 0) && (
+                                  <p className="text-gray-500 text-sm italic">No links added yet. Click "Add Link" to start.</p>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center space-x-6 bg-white p-4 rounded-lg border border-gray-200">
+                              <label className="flex items-center text-gray-900 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={editFormData.owning !== false}
+                                  onChange={(e) => setEditFormData({ ...editFormData, owning: e.target.checked })}
+                                  className="mr-3 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                />
+                                <span className="font-semibold">Owning Recipe</span>
+                              </label>
+                            </div>
+
+                            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                              <button
+                                onClick={onCancelEdit}
+                                className="px-6 py-2.5 border-2 border-gray-300 rounded-lg hover:bg-gray-100 text-gray-900 font-semibold transition"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={onSave}
+                                className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition shadow-lg hover:shadow-xl"
+                              >
+                                Save Changes
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
             ))
           )}
         </tbody>
       </table>
+      
+      <style jsx>{`
+        @keyframes expandDown {
+          from {
+            opacity: 0;
+            max-height: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            max-height: 2000px;
+            transform: translateY(0);
+          }
+        }
+        .animate-expandDown {
+          animation: expandDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+      `}</style>
     </div>
   );
 }
@@ -944,162 +1774,6 @@ function NotificationTable({ notifications, loading, onDelete }: any) {
           )}
         </tbody>
       </table>
-    </div>
-  );
-}
-
-// Component: EditModal
-function EditModal({ item, formData, setFormData, onClose, onSave }: any) {
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <h2 className="text-2xl font-bold mb-4 text-gray-900">
-          Edit {item.type.slice(0, -1)}
-        </h2>
-        <div className="space-y-4">
-          {item.type === 'users' && (
-            <>
-              <div>
-                <label className="block text-sm font-semibold mb-1 text-gray-900">Name</label>
-                <input
-                  type="text"
-                  value={formData.name || ''}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-1 text-gray-900">Email</label>
-                <input
-                  type="email"
-                  value={formData.email || ''}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-1 text-gray-900">Username</label>
-                <input
-                  type="text"
-                  value={formData.username || ''}
-                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-1 text-gray-900">Subscription Tier</label>
-                <select
-                  value={formData.subscriptionTier || 'free'}
-                  onChange={(e) => setFormData({ ...formData, subscriptionTier: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900"
-                >
-                  <option value="free">Free</option>
-                  <option value="pro">Pro</option>
-                  <option value="premium">Premium</option>
-                </select>
-              </div>
-              <div>
-                <label className="flex items-center text-gray-900">
-                  <input
-                    type="checkbox"
-                    checked={formData.isPrivate || false}
-                    onChange={(e) => setFormData({ ...formData, isPrivate: e.target.checked })}
-                    className="mr-2"
-                  />
-                  <span className="font-semibold">Private Account</span>
-                </label>
-              </div>
-            </>
-          )}
-          {item.type === 'posts' && (
-            <>
-              <div>
-                <label className="block text-sm font-semibold mb-1 text-gray-900">Title</label>
-                <input
-                  type="text"
-                  value={formData.title || ''}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-1 text-gray-900">Body</label>
-                <textarea
-                  value={formData.body || ''}
-                  onChange={(e) => setFormData({ ...formData, body: e.target.value })}
-                  rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900"
-                />
-              </div>
-            </>
-          )}
-          {item.type === 'recipes' && (
-            <>
-              <div>
-                <label className="block text-sm font-semibold mb-1 text-gray-900">Title</label>
-                <input
-                  type="text"
-                  value={formData.title || ''}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-1 text-gray-900">Description</label>
-                <textarea
-                  value={formData.description || ''}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-1 text-gray-900">Type</label>
-                <input
-                  type="text"
-                  value={formData.type || ''}
-                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold mb-1 text-gray-900">Time</label>
-                  <input
-                    type="text"
-                    value={formData.time || ''}
-                    onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold mb-1 text-gray-900">Calories</label>
-                  <input
-                    type="text"
-                    value={formData.kcal || ''}
-                    onChange={(e) => setFormData({ ...formData, kcal: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900"
-                  />
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-        <div className="mt-6 flex justify-end space-x-3">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 text-gray-900 font-semibold"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onSave}
-            className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 font-semibold"
-          >
-            Save Changes
-          </button>
-        </div>
-      </div>
     </div>
   );
 }

@@ -37,10 +37,17 @@ export async function GET(req: NextRequest) {
       SocialPost.countDocuments(query),
     ]);
 
-    // Get user details for posts
-    const userIds = [...new Set(posts.map((p: any) => p.userId.toString()))];
-    const users = await User.find({ _id: { $in: userIds } })
-      .select('_id name username')
+    // Get user details for posts and comments
+    const postUserIds = [...new Set(posts.map((p: any) => p.userId.toString()))];
+    const commentUserIds = [...new Set(
+      posts.flatMap((p: any) => 
+        (p.comments || []).map((c: any) => c.userId?.toString()).filter(Boolean)
+      )
+    )];
+    const allUserIds = [...new Set([...postUserIds, ...commentUserIds])];
+    
+    const users = await User.find({ _id: { $in: allUserIds } })
+      .select('_id name username avatarUrl')
       .lean();
     
     const userMap = new Map(users.map((u: any) => [u._id.toString(), u]));
@@ -53,6 +60,7 @@ export async function GET(req: NextRequest) {
           title: p.title,
           body: p.body,
           imageColor: p.imageColor,
+          imageUrl: p.imageUrl,
           imageUrls: p.imageUrls || [],
           isPoll: p.isPoll || false,
           pollOptions: p.pollOptions || [],
@@ -63,7 +71,23 @@ export async function GET(req: NextRequest) {
             id: user._id.toString(),
             name: user.name,
             username: user.username,
+            avatarUrl: user.avatarUrl,
           } : null,
+          comments: (p.comments || []).map((c: any) => {
+            const commentUser = userMap.get(c.userId?.toString());
+            return {
+              id: c._id?.toString(),
+              text: c.text,
+              likes: c.likedUserIds?.length || 0,
+              user: commentUser ? {
+                id: commentUser._id.toString(),
+                name: commentUser.name,
+                username: commentUser.username,
+                avatarUrl: commentUser.avatarUrl,
+              } : null,
+              createdAt: c.createdAt,
+            };
+          }),
           createdAt: p.createdAt,
           updatedAt: p.updatedAt,
         };

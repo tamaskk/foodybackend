@@ -45,7 +45,8 @@ const SocialPostSchema = new Schema<ISocialPost>(
     },
     body: {
       type: String,
-      required: true,
+      required: false,
+      default: '',
       trim: true,
     },
     imageColor: {

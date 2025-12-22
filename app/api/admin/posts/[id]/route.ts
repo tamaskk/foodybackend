@@ -15,7 +15,12 @@ export async function GET(
     await connectDB();
     const { id } = await params;
 
-    const post = await SocialPost.findById(id).lean();
+    const post = await SocialPost.findById(id)
+      .populate('userId', 'name username avatarUrl')
+      .populate('comments.userId', 'name username avatarUrl')
+      .populate('likedUserIds', 'name username avatarUrl')
+      .lean();
+    
     if (!post) {
       return NextResponse.json({ error: 'Post not found' }, { status: 404 });
     }
@@ -26,6 +31,7 @@ export async function GET(
         title: post.title,
         body: post.body,
         imageColor: post.imageColor,
+        imageUrl: post.imageUrl,
         imageUrls: post.imageUrls || [],
         isPoll: post.isPoll || false,
         pollOptions: post.pollOptions || [],
@@ -33,6 +39,20 @@ export async function GET(
         commentsCount: post.comments?.length || 0,
         savesCount: post.savedUserIds?.length || 0,
         userId: post.userId.toString(),
+        user: post.userId,
+        likedUsers: (post.likedUserIds as any[])?.map((user: any) => ({
+          id: user._id?.toString(),
+          name: user.name,
+          username: user.username,
+          avatarUrl: user.avatarUrl,
+        })) || [],
+        comments: post.comments?.map((comment: any) => ({
+          id: comment._id?.toString(),
+          text: comment.text,
+          likes: comment.likedUserIds?.length || 0,
+          user: comment.userId,
+          createdAt: comment.createdAt,
+        })) || [],
         createdAt: post.createdAt,
         updatedAt: post.updatedAt,
       },
@@ -63,7 +83,10 @@ export async function PATCH(
     if (body.title !== undefined) updateFields.title = body.title;
     if (body.body !== undefined) updateFields.body = body.body;
     if (body.imageColor !== undefined) updateFields.imageColor = body.imageColor;
+    if (body.imageUrl !== undefined) updateFields.imageUrl = body.imageUrl;
     if (body.imageUrls !== undefined) updateFields.imageUrls = body.imageUrls;
+    if (body.isPoll !== undefined) updateFields.isPoll = body.isPoll;
+    if (body.pollOptions !== undefined) updateFields.pollOptions = body.pollOptions;
 
     const post = await SocialPost.findByIdAndUpdate(
       id,
@@ -82,7 +105,10 @@ export async function PATCH(
         title: post.title,
         body: post.body,
         imageColor: post.imageColor,
+        imageUrl: post.imageUrl,
         imageUrls: post.imageUrls || [],
+        isPoll: post.isPoll || false,
+        pollOptions: post.pollOptions || [],
         createdAt: post.createdAt,
         updatedAt: post.updatedAt,
       },

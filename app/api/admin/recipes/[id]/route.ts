@@ -30,10 +30,13 @@ export async function GET(
         type: recipe.type,
         time: recipe.time,
         kcal: recipe.kcal,
+        code: recipe.code,
+        owning: recipe.owning,
+        image: recipe.image,
+        picture: recipe.picture,
         ingredients: recipe.ingredients || [],
         steps: recipe.steps || [],
         links: recipe.links || [],
-        code: recipe.code,
         userId: recipe.userId.toString(),
         createdAt: recipe.createdAt,
         updatedAt: recipe.updatedAt,
@@ -67,6 +70,10 @@ export async function PATCH(
     if (body.type !== undefined) updateFields.type = body.type;
     if (body.time !== undefined) updateFields.time = body.time;
     if (body.kcal !== undefined) updateFields.kcal = body.kcal;
+    if (body.code !== undefined) updateFields.code = body.code;
+    if (body.owning !== undefined) updateFields.owning = body.owning;
+    if (body.image !== undefined) updateFields.image = body.image;
+    if (body.picture !== undefined) updateFields.picture = body.picture;
     if (body.ingredients !== undefined) updateFields.ingredients = body.ingredients;
     if (body.steps !== undefined) updateFields.steps = body.steps;
     if (body.links !== undefined) updateFields.links = body.links;
@@ -92,6 +99,10 @@ export async function PATCH(
         type: recipe.type,
         time: recipe.time,
         kcal: recipe.kcal,
+        code: recipe.code,
+        owning: recipe.owning,
+        image: recipe.image,
+        picture: recipe.picture,
         ingredients: recipe.ingredients || [],
         steps: recipe.steps || [],
         links: recipe.links || [],
