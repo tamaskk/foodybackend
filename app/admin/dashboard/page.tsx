@@ -79,6 +79,16 @@ interface Notification {
   createdAt: string;
 }
 
+interface Contact {
+  id: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  status: 'new' | 'read' | 'replied';
+  createdAt: string;
+}
+
 interface Pagination {
   page: number;
   limit: number;
@@ -86,7 +96,7 @@ interface Pagination {
   totalPages: number;
 }
 
-type Tab = 'dashboard' | 'users' | 'posts' | 'recipes' | 'notifications';
+type Tab = 'dashboard' | 'users' | 'posts' | 'recipes' | 'notifications' | 'contacts';
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -98,12 +108,14 @@ export default function AdminDashboard() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
   
   // Pagination states
   const [usersPagination, setUsersPagination] = useState<Pagination>({ page: 1, limit: 20, total: 0, totalPages: 1 });
   const [postsPagination, setPostsPagination] = useState<Pagination>({ page: 1, limit: 20, total: 0, totalPages: 1 });
   const [recipesPagination, setRecipesPagination] = useState<Pagination>({ page: 1, limit: 20, total: 0, totalPages: 1 });
   const [notificationsPagination, setNotificationsPagination] = useState<Pagination>({ page: 1, limit: 20, total: 0, totalPages: 1 });
+  const [contactsPagination, setContactsPagination] = useState<Pagination>({ page: 1, limit: 20, total: 0, totalPages: 1 });
   
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -111,6 +123,7 @@ export default function AdminDashboard() {
   const [postFilter, setPostFilter] = useState({ minLikes: '', minComments: '' });
   const [recipeFilter, setRecipeFilter] = useState({ type: '' });
   const [notificationFilter, setNotificationFilter] = useState({ type: '' });
+  const [contactFilter, setContactFilter] = useState({ status: '' });
   
   const [loading, setLoading] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
@@ -142,8 +155,10 @@ export default function AdminDashboard() {
       loadRecipes();
     } else if (activeTab === 'notifications') {
       loadNotifications();
+    } else if (activeTab === 'contacts') {
+      loadContacts();
     }
-  }, [activeTab, searchQuery, userFilter, postFilter, recipeFilter, notificationFilter, usersPagination.page, postsPagination.page, recipesPagination.page, notificationsPagination.page]);
+  }, [activeTab, searchQuery, userFilter, postFilter, recipeFilter, notificationFilter, contactFilter, usersPagination.page, postsPagination.page, recipesPagination.page, notificationsPagination.page, contactsPagination.page]);
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem('adminToken');
@@ -254,6 +269,25 @@ export default function AdminDashboard() {
       }
     } catch (error) {
       console.error('Failed to load notifications:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadContacts = async () => {
+    setLoading(true);
+    try {
+      let url = `/api/admin/contacts?page=${contactsPagination.page}&limit=${contactsPagination.limit}`;
+      if (contactFilter.status) url += `&status=${contactFilter.status}`;
+      
+      const response = await fetch(url, { headers: getAuthHeaders() });
+      if (response.ok) {
+        const data = await response.json();
+        setContacts(data.contacts);
+        setContactsPagination(prev => ({ ...prev, ...data.pagination }));
+      }
+    } catch (error) {
+      console.error('Failed to load contacts:', error);
     } finally {
       setLoading(false);
     }
@@ -382,6 +416,7 @@ export default function AdminDashboard() {
     else if (tab === 'posts') setPostsPagination(prev => ({ ...prev, page: newPage }));
     else if (tab === 'recipes') setRecipesPagination(prev => ({ ...prev, page: newPage }));
     else if (tab === 'notifications') setNotificationsPagination(prev => ({ ...prev, page: newPage }));
+    else if (tab === 'contacts') setContactsPagination(prev => ({ ...prev, page: newPage }));
   };
 
   const clearFilters = () => {
@@ -390,6 +425,7 @@ export default function AdminDashboard() {
     setPostFilter({ minLikes: '', minComments: '' });
     setRecipeFilter({ type: '' });
     setNotificationFilter({ type: '' });
+    setContactFilter({ status: '' });
   };
 
   return (
@@ -411,7 +447,7 @@ export default function AdminDashboard() {
       <div className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4">
           <nav className="flex space-x-8">
-            {(['dashboard', 'users', 'posts', 'recipes', 'notifications'] as Tab[]).map((tab) => (
+            {(['dashboard', 'users', 'posts', 'recipes', 'notifications', 'contacts'] as Tab[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => {
@@ -601,6 +637,22 @@ export default function AdminDashboard() {
                 </button>
               </div>
             )}
+            
+            {/* Contacts Filters */}
+            {activeTab === 'contacts' && (
+              <div className="flex gap-4">
+                <select
+                  value={contactFilter.status}
+                  onChange={(e) => setContactFilter({ ...contactFilter, status: e.target.value })}
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-gray-900"
+                >
+                  <option value="">All Status</option>
+                  <option value="new">New</option>
+                  <option value="read">Read</option>
+                  <option value="replied">Replied</option>
+                </select>
+              </div>
+            )}
           </div>
         )}
 
@@ -663,6 +715,14 @@ export default function AdminDashboard() {
           <>
             <NotificationTable notifications={notifications} loading={loading} onDelete={handleDelete} />
             <Paginator pagination={notificationsPagination} onPageChange={(page) => changePage('notifications', page)} />
+          </>
+        )}
+
+        {/* Contacts Table with Pagination */}
+        {activeTab === 'contacts' && (
+          <>
+            <ContactTable contacts={contacts} loading={loading} onDelete={handleDelete} onStatusChange={handleEdit} />
+            <Paginator pagination={contactsPagination} onPageChange={(page) => changePage('contacts', page)} />
           </>
         )}
       </main>
@@ -1764,6 +1824,106 @@ function NotificationTable({ notifications, loading, onDelete }: any) {
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <button
                     onClick={() => onDelete('notifications', notification.id)}
+                    className="text-red-600 hover:text-red-900 font-semibold"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// Component: ContactTable
+function ContactTable({ contacts, loading, onDelete, onStatusChange }: any) {
+  const getStatusColor = (status: string) => {
+    const colors: any = {
+      new: 'bg-blue-100 text-blue-800',
+      read: 'bg-gray-100 text-gray-800',
+      replied: 'bg-green-100 text-green-800',
+    };
+    return colors[status] || colors.new;
+  };
+
+  const handleStatusChange = async (contact: Contact, newStatus: string) => {
+    try {
+      const response = await fetch(`/api/admin/contacts/${contact.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('adminToken')}`,
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (response.ok) {
+        window.location.reload(); // Reload to show updated status
+      } else {
+        alert('Failed to update status');
+      }
+    } catch (error) {
+      console.error('Failed to update contact status:', error);
+      alert('Error updating status');
+    }
+  };
+
+  return (
+    <div className="bg-white shadow rounded-lg overflow-hidden">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Name</th>
+            <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Email</th>
+            <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Subject</th>
+            <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Message</th>
+            <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Status</th>
+            <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Date</th>
+            <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Actions</th>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {loading ? (
+            <tr>
+              <td colSpan={7} className="px-6 py-4 text-center text-gray-900">Loading...</td>
+            </tr>
+          ) : contacts.length === 0 ? (
+            <tr>
+              <td colSpan={7} className="px-6 py-4 text-center text-gray-900">No contact messages found</td>
+            </tr>
+          ) : (
+            contacts.map((contact: Contact) => (
+              <tr key={contact.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap text-gray-900 font-medium">{contact.name}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-gray-900">{contact.email}</td>
+                <td className="px-6 py-4 text-gray-900 font-medium max-w-xs truncate">{contact.subject}</td>
+                <td className="px-6 py-4 text-gray-900 max-w-md truncate">{contact.message}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <select
+                    value={contact.status}
+                    onChange={(e) => handleStatusChange(contact, e.target.value)}
+                    className={`px-2 py-1 rounded text-xs font-semibold ${getStatusColor(contact.status)} border-0 cursor-pointer`}
+                  >
+                    <option value="new">NEW</option>
+                    <option value="read">READ</option>
+                    <option value="replied">REPLIED</option>
+                  </select>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-gray-900">
+                  {new Date(contact.createdAt).toLocaleDateString()}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <a
+                    href={`mailto:${contact.email}?subject=Re: ${contact.subject}`}
+                    className="text-blue-600 hover:text-blue-900 mr-3 font-semibold"
+                  >
+                    Reply
+                  </a>
+                  <button
+                    onClick={() => onDelete('contacts', contact.id)}
                     className="text-red-600 hover:text-red-900 font-semibold"
                   >
                     Delete

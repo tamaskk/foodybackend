@@ -89,47 +89,18 @@ export default function FoodyLanding() {
             transition={{ duration: 0.7, delay: 0.2 }}
             className="relative"
           >
-            <div className="relative z-10">
-              <PhoneMockup>
-                <div className="p-4">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="font-bold text-lg">All Services</h3>
-                    <div className="text-xs bg-gray-100 px-3 py-1 rounded-full">in one place</div>
-                  </div>
-                  <div className="bg-gray-50 rounded-xl p-3 mb-4">
-                    <p className="text-xs text-gray-500 mb-1">Category</p>
-                    <div className="flex gap-2 overflow-x-auto pb-2">
-                      <CategoryChip emoji="🍳" label="Breakfast" />
-                      <CategoryChip emoji="🍱" label="Lunch" />
-                      <CategoryChip emoji="🍽️" label="Dinner" />
-                    </div>
-                  </div>
-                  <RecipeMiniCard title="Creamy Pasta" time="25 min" color="#FFF3D9" />
-                  <RecipeMiniCard title="Greek Salad" time="15 min" color="#DDF6FF" />
-                  <RecipeMiniCard title="Chicken Curry" time="45 min" color="#FFE5F3" />
-                </div>
-              </PhoneMockup>
+            <div className="relative z-10 max-w-sm mx-auto">
+              <img 
+                src="/assets/recipepage.jpeg" 
+                alt="Foody App Screenshot"
+                className="w-auto h-[500px] rounded-[2.5rem] shadow-2xl"
+              />
             </div>
-            {/* Floating cards */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.5 }}
-              className="absolute -left-8 top-12 bg-white rounded-2xl shadow-lg p-3 text-sm hidden lg:block"
-            >
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 bg-[#FF6B35] rounded-full flex items-center justify-center text-xl">👨‍🍳</div>
-                <div>
-                  <p className="font-semibold text-xs">John Anderson</p>
-                  <p className="text-xs text-gray-500">Pro Chef</p>
-                </div>
-              </div>
-            </motion.div>
           </motion.div>
         </div>
 
         {/* Partner Logos */}
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.4 }}
@@ -142,7 +113,7 @@ export default function FoodyLanding() {
             <LogoText text="Firebase" />
             <LogoText text="Stripe" />
           </div>
-        </motion.div>
+        </motion.div> */}
       </section>
 
       {/* FEATURE 1 - MY CART / SAVED RECIPES */}
@@ -155,8 +126,8 @@ export default function FoodyLanding() {
               viewport={{ once: true }}
               className="relative"
             >
-              <div className="bg-[#FF6B35] rounded-[3rem] p-8 lg:p-12">
-                <PhoneMockup bgColor="white">
+              <div className="bg-[#FF6B35] w-fit rounded-[3rem] p-8 lg:p-12 flex flex-col items-center justify-center">
+                {/* <PhoneMockup bgColor="white">
                   <div className="p-4">
                     <h3 className="font-bold text-lg mb-4">My Saved</h3>
                     <SavedRecipeItem 
@@ -175,7 +146,15 @@ export default function FoodyLanding() {
                       image="🥙"
                     />
                   </div>
-                </PhoneMockup>
+                </PhoneMockup> */}
+            {/* <div className="relative z-10 max-w-sm mx-auto"> */}
+              <img 
+                src="/assets/addrecipesoptions.jpeg" 
+                alt="Foody App Screenshot"
+                className="w-auto h-[500px] rounded-[2.5rem] shadow-2xl"
+              />
+            {/* </div> */}
+                
               </div>
             </motion.div>
 
@@ -307,35 +286,13 @@ export default function FoodyLanding() {
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
+              className="relative max-w-sm mx-auto"
             >
-              <PhoneMockup>
-                <div className="p-4">
-                  <div className="bg-gray-50 rounded-2xl p-4 mb-3">
-                    <div className="flex gap-3 mb-3">
-                      <div className="w-16 h-16 bg-[#FF6B35] rounded-xl"></div>
-                      <div className="flex-1">
-                        <h4 className="font-bold text-sm mb-1">Recipe Details</h4>
-                        <p className="text-xs text-gray-500">Ingredients & Steps</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      {[1,2,3,4].map(i => (
-                        <div key={i} className="w-14 h-14 bg-gray-200 rounded-lg"></div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="bg-gradient-to-br from-[#FF6B35] to-[#FF8C42] rounded-2xl p-4 text-white">
-                    <p className="text-xs mb-1 opacity-90">Featured Recipe</p>
-                    <h4 className="font-bold mb-2">Italian Carbonara</h4>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs">Ready in 30min</span>
-                      <button className="bg-white text-[#FF6B35] px-4 py-1 rounded-full text-xs font-semibold">
-                        View
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </PhoneMockup>
+              <img 
+                src="/assets/feed.jpeg" 
+                alt="Recipe Page Screenshot"
+                className="w-auto h-[700px] max-h-[700px] rounded-[2.5rem] shadow-2xl"
+              />
             </motion.div>
           </div>
 
@@ -346,29 +303,11 @@ export default function FoodyLanding() {
               viewport={{ once: true }}
               className="order-2 lg:order-1"
             >
-              <PhoneMockup>
-                <div className="p-4">
-                  <h3 className="font-bold mb-4">Get Notified</h3>
-                  <NotificationCard 
-                    icon="🏆"
-                    title="Achievement Unlocked!"
-                    description="You earned Food Creator badge"
-                    time="2m ago"
-                  />
-                  <NotificationCard 
-                    icon="❤️"
-                    title="Sarah liked your post"
-                    description="Your pasta recipe"
-                    time="1h ago"
-                  />
-                  <NotificationCard 
-                    icon="👥"
-                    title="New Follower"
-                    description="Mike started following you"
-                    time="3h ago"
-                  />
-                </div>
-              </PhoneMockup>
+              <img 
+                src="/assets/profilepage.jpeg" 
+                alt="Recipe Page Screenshot"
+                className="w-auto h-[700px] max-h-[700px] rounded-[2.5rem] shadow-2xl"
+              />
             </motion.div>
 
             <motion.div
@@ -417,19 +356,19 @@ export default function FoodyLanding() {
               text="An amazing platform where I never have to worry about losing my favorite recipes. The AI import feature is incredible!"
               author="Sarah Mitchell"
               role="Home Chef"
-              avatar="👩‍🍳"
+              avatar="/assets/kover.webp"
             />
             <TestimonialCard 
               text="I love the emergency call feature! Whenever I need help with a recipe, the community is there for me. It's like having friends cooking with me."
               author="David Park"
               role="Food Blogger"
-              avatar="👨‍🍳"
+              avatar="/assets/ader.jpg"
             />
             <TestimonialCard 
               text="Their gamification with achievements and levels keeps me motivated to try new recipes. I've discovered so many amazing dishes!"
               author="Emma Wilson"
               role="Cooking Enthusiast"
-              avatar="👩‍🍳"
+              avatar="/assets/szili.jpg"
             />
           </div>
         </div>
@@ -483,33 +422,17 @@ export default function FoodyLanding() {
               viewport={{ once: true }}
               className="relative"
             >
-              <div className="grid grid-cols-2 gap-4">
-                <PhoneMockup compact>
-                  <div className="p-3">
-                    <div className="bg-gradient-to-br from-[#FFE5D9] to-[#FFF3D9] rounded-xl p-3 mb-2">
-                      <p className="text-xs font-bold mb-1">Home Chef</p>
-                      <p className="text-[10px] text-gray-600">1,234 Recipes</p>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="h-12 bg-gray-100 rounded-lg"></div>
-                      <div className="h-12 bg-gray-100 rounded-lg"></div>
-                    </div>
-                  </div>
-                </PhoneMockup>
-                <div className="pt-12">
-                  <PhoneMockup compact>
-                    <div className="p-3">
-                      <div className="bg-[#FF6B35] text-white rounded-xl p-3 mb-2">
-                        <p className="text-xs font-bold mb-1">Pro Chef</p>
-                        <p className="text-[10px] opacity-90">Level 24</p>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="h-12 bg-gray-100 rounded-lg"></div>
-                        <div className="h-12 bg-gray-100 rounded-lg"></div>
-                      </div>
-                    </div>
-                  </PhoneMockup>
-                </div>
+              <div className="grid grid-cols-2 gap-0">
+                <img 
+                  src="/assets/newrecipeaddIngredients.jpeg" 
+                  alt="Recipe Page Screenshot"
+                  className="w-auto h-[400px] max-h-[400px] rounded-[2.5rem] shadow-2xl"
+                />
+                  <img 
+                    src="/assets/recipedetails.jpeg" 
+                    alt="Recipe Page Screenshot"
+                    className="w-auto h-[400px] max-h-[400px] rounded-[2.5rem] shadow-2xl"
+                  />
               </div>
             </motion.div>
           </div>
@@ -699,8 +622,17 @@ function TestimonialCard({ text, author, role, avatar }: { text: string; author:
     >
       <p className="text-[#8B7E74] mb-6 leading-relaxed">&quot;{text}&quot;</p>
       <div className="flex items-center gap-3">
-        <div className="w-12 h-12 bg-gradient-to-br from-[#FF6B35] to-[#FF8C42] rounded-full flex items-center justify-center text-2xl">
+        {/* <div className="w-12 h-12 bg-gradient-to-br from-[#FF6B35] to-[#FF8C42] rounded-full flex items-center justify-center text-2xl">
           {avatar}
+        </div> */}
+        {/* Avatar should be a profile picture */}
+        {/* <img 
+          src={avatar}
+          alt="Profile Picture"
+          className="w-12 h-12 rounded-full"
+        /> */}
+        <div className="w-12 h-12 rounded-full" style={{ backgroundImage: `url(${avatar})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+
         </div>
         <div>
           <p className="font-bold text-sm">{author}</p>
