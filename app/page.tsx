@@ -1,9 +1,12 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { FaApple, FaGooglePlay } from "react-icons/fa"
+import { useState } from "react"
+import { FaApple, FaGooglePlay, FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaBars, FaTimes } from "react-icons/fa"
 
 export default function FoodyLanding() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
   return (
     <div className="bg-[#FFF8F3] text-[#2D241E] overflow-hidden">
       {/* NAVBAR */}
@@ -11,12 +14,14 @@ export default function FoodyLanding() {
         initial={{ y: -30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6 }}
-        className="max-w-7xl mx-auto flex items-center justify-between px-6 py-6"
+        className="max-w-7xl mx-auto flex items-center justify-between px-6 py-6 relative"
       >
         <div className="flex items-center gap-2">
-          <div className="bg-[#FF6B35] text-white px-3 py-1 rounded-lg font-black text-xl">
-            Foody
-          </div>
+          <img 
+            src="/assets/headerlogo.png" 
+            alt="Foody Logo"
+            className="h-10"
+          />
         </div>
         <div className="hidden md:flex gap-8 text-sm font-medium">
           <a href="#features" className="hover:text-[#FF6B35] transition-colors">Features</a>
@@ -24,7 +29,7 @@ export default function FoodyLanding() {
           <a href="#testimonials" className="hover:text-[#FF6B35] transition-colors">Reviews</a>
           <a href="/contact" className="hover:text-[#FF6B35] transition-colors">Contact</a>
         </div>
-        <div className="flex gap-2">
+        <div className="hidden md:flex gap-2">
           <button className="bg-[#FF6B35] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#FF5722] transition-colors flex items-center gap-2">
             <div className="text-base"><FaApple /></div>
             <div className="text-left">
@@ -40,7 +45,92 @@ export default function FoodyLanding() {
             </div>
           </button>
         </div>
+        {/* Mobile Menu Button */}
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="md:hidden text-[#2D241E] text-2xl focus:outline-none"
+          aria-label="Toggle menu"
+        >
+          {mobileMenuOpen ? <FaTimes /> : <FaBars />}
+        </button>
       </motion.nav>
+      
+      {/* Mobile Menu - Full Page */}
+      {mobileMenuOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="md:hidden fixed inset-0 bg-white z-[10000] overflow-y-auto"
+        >
+          <div className="flex flex-col min-h-full">
+            {/* Header with Close Button */}
+            <div className="flex items-center justify-between px-6 py-6 border-b border-gray-200">
+              <img 
+                src="/assets/headerlogo.png" 
+                alt="Foody Logo"
+                className="h-10"
+              />
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-[#2D241E] text-2xl focus:outline-none"
+                aria-label="Close menu"
+              >
+                <FaTimes />
+              </button>
+            </div>
+            
+            {/* Menu Content */}
+            <div className="flex-1 flex flex-col justify-center px-6 py-12 space-y-6">
+              <a 
+                href="#features" 
+                className="block text-lg font-medium hover:text-[#FF6B35] transition-colors text-center"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Features
+              </a>
+              <a 
+                href="#services" 
+                className="block text-lg font-medium hover:text-[#FF6B35] transition-colors text-center"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Services
+              </a>
+              <a 
+                href="#testimonials" 
+                className="block text-lg font-medium hover:text-[#FF6B35] transition-colors text-center"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Reviews
+              </a>
+              <a 
+                href="/contact" 
+                className="block text-lg font-medium hover:text-[#FF6B35] transition-colors text-center"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Contact
+              </a>
+              
+              <div className="pt-8 border-t border-gray-200 flex flex-col gap-4">
+                <button className="bg-[#FF6B35] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#FF5722] transition-colors flex items-center justify-center gap-2">
+                  <div className="text-base"><FaApple /></div>
+                  <div className="text-left">
+                    <div className="text-[10px] leading-tight">Download on the</div>
+                    <div className="text-sm font-bold leading-tight">App Store</div>
+                  </div>
+                </button>
+                <button className="bg-[#FF6B35] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#FF5722] transition-colors flex items-center justify-center gap-2">
+                  <div className="text-base"><FaGooglePlay /></div>
+                  <div className="text-left">
+                    <div className="text-[10px] leading-tight">Get it on</div>
+                    <div className="text-sm font-bold leading-tight">Google Play</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {/* HERO */}
       <section className="max-w-7xl mx-auto px-6 pt-12 pb-20">
@@ -56,7 +146,7 @@ export default function FoodyLanding() {
             <p className="text-lg text-[#8B7E74] mb-8 leading-relaxed">
               Save, organize, and share recipes with AI-powered tools. Join thousands of home cooks making meal planning effortless.
             </p>
-            <div className="flex gap-4 mb-8">
+            <div className="flex gap-4 mb-8 justify-center lg:justify-start">
               <motion.button
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
@@ -87,13 +177,13 @@ export default function FoodyLanding() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.7, delay: 0.2 }}
-            className="relative"
+            className="relative flex justify-start lg:justify-center lg:ml-8"
           >
-            <div className="relative z-10 max-w-sm mx-auto">
+            <div className="relative z-10 max-w-sm mx-auto lg:mx-0">
               <img 
                 src="/assets/recipepage.jpeg" 
                 alt="Foody App Screenshot"
-                className="w-auto h-[500px] rounded-[2.5rem] shadow-2xl"
+                className="w-auto h-[500px] rounded-[2.5rem] shadow-2xl mx-auto"
               />
             </div>
           </motion.div>
@@ -124,9 +214,9 @@ export default function FoodyLanding() {
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="relative"
+              className="relative flex justify-center lg:justify-start"
             >
-              <div className="bg-[#FF6B35] w-fit rounded-[3rem] p-8 lg:p-12 flex flex-col items-center justify-center">
+              <div className="bg-[#FF6B35] w-fit mx-auto lg:mx-0 rounded-[3rem] p-8 lg:p-12 flex flex-col items-center justify-center">
                 {/* <PhoneMockup bgColor="white">
                   <div className="p-4">
                     <h3 className="font-bold text-lg mb-4">My Saved</h3>
@@ -151,7 +241,7 @@ export default function FoodyLanding() {
               <img 
                 src="/assets/addrecipesoptions.jpeg" 
                 alt="Foody App Screenshot"
-                className="w-auto h-[500px] rounded-[2.5rem] shadow-2xl"
+                className="w-auto h-[500px] rounded-[2.5rem] shadow-2xl mx-auto"
               />
             {/* </div> */}
                 
@@ -232,12 +322,12 @@ export default function FoodyLanding() {
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="relative"
+              className="relative flex justify-center lg:justify-end"
             >
               <img 
                 src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=600&h=700&fit=crop" 
                 alt="Cooking together"
-                className="rounded-3xl shadow-2xl w-full object-cover"
+                className="rounded-3xl shadow-2xl w-full max-w-sm mx-auto lg:mx-0 object-cover"
               />
             </motion.div>
           </div>
@@ -286,12 +376,12 @@ export default function FoodyLanding() {
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              className="relative max-w-sm mx-auto"
+              className="relative max-w-sm mx-auto flex justify-center"
             >
               <img 
                 src="/assets/feed.jpeg" 
                 alt="Recipe Page Screenshot"
-                className="w-auto h-[700px] max-h-[700px] rounded-[2.5rem] shadow-2xl"
+                className="w-auto h-[700px] max-h-[700px] rounded-[2.5rem] shadow-2xl mx-auto"
               />
             </motion.div>
           </div>
@@ -301,12 +391,12 @@ export default function FoodyLanding() {
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              className="order-2 lg:order-1"
+              className="order-2 lg:order-1 flex justify-center lg:justify-start"
             >
               <img 
                 src="/assets/profilepage.jpeg" 
                 alt="Recipe Page Screenshot"
-                className="w-auto h-[700px] max-h-[700px] rounded-[2.5rem] shadow-2xl"
+                className="w-auto h-[700px] max-h-[700px] rounded-[2.5rem] shadow-2xl mx-auto lg:mx-0"
               />
             </motion.div>
 
@@ -420,14 +510,14 @@ export default function FoodyLanding() {
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="relative"
+              className="relative flex justify-center lg:justify-end"
             >
-              <div className="grid grid-cols-2 gap-0">
-                <img 
-                  src="/assets/newrecipeaddIngredients.jpeg" 
-                  alt="Recipe Page Screenshot"
-                  className="w-auto h-[400px] max-h-[400px] rounded-[2.5rem] shadow-2xl"
-                />
+              <div className="grid grid-cols-2 gap-4 lg:gap-20 mx-auto lg:mx-0">
+                  <img 
+                    src="/assets/newrecipeaddIngredients.jpeg" 
+                    alt="Recipe Page Screenshot"
+                    className="w-auto h-[400px] max-h-[400px] rounded-[2.5rem] shadow-2xl"
+                  />
                   <img 
                     src="/assets/recipedetails.jpeg" 
                     alt="Recipe Page Screenshot"
@@ -445,18 +535,20 @@ export default function FoodyLanding() {
           <div className="grid md:grid-cols-4 gap-12 mb-12">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="bg-[#FF6B35] text-white px-3 py-1 rounded-lg font-black text-lg">
-                  Foody
-                </div>
+                <img 
+                  src="/assets/headerlogo.png" 
+                  alt="Foody Logo"
+                  className="h-8"
+                />
               </div>
               <p className="text-sm opacity-70 mb-4">
                 A unified platform that connects foodies for sharing, learning, and more. Restaurant quality cooking at home with AI-powered recipe tools.
               </p>
               <div className="flex gap-3">
-                <SocialIcon icon="📘" />
-                <SocialIcon icon="🐦" />
-                <SocialIcon icon="📷" />
-                <SocialIcon icon="💼" />
+                <SocialIcon icon={<FaFacebook />} />
+                <SocialIcon icon={<FaTwitter />} />
+                <SocialIcon icon={<FaInstagram />} />
+                <SocialIcon icon={<FaLinkedin />} />
               </div>
             </div>
 
@@ -643,9 +735,9 @@ function TestimonialCard({ text, author, role, avatar }: { text: string; author:
   )
 }
 
-function SocialIcon({ icon }: { icon: string }) {
+function SocialIcon({ icon }: { icon: React.ReactNode }) {
   return (
-    <div className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center cursor-pointer transition-colors">
+    <div className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center cursor-pointer transition-colors text-xl">
       {icon}
     </div>
   )

@@ -15,10 +15,13 @@ import {
   FaTwitter,
   FaLinkedin,
   FaCheckCircle,
-  FaTimesCircle
+  FaTimesCircle,
+  FaBars,
+  FaTimes
 } from "react-icons/fa";
 
 export default function ContactPage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -48,9 +51,11 @@ export default function ContactPage() {
         setIsSubmitting(false)
         setSubmitStatus("success")
         
-        // Reset form after success
+        // Clear form immediately
+        setFormData({ name: "", email: "", subject: "", message: "" })
+        
+        // Hide success message after 5 seconds
         setTimeout(() => {
-          setFormData({ name: "", email: "", subject: "", message: "" })
           setSubmitStatus("idle")
         }, 5000)
       } else {
@@ -78,12 +83,14 @@ export default function ContactPage() {
         initial={{ y: -30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6 }}
-        className="max-w-7xl mx-auto flex items-center justify-between px-6 py-6"
+        className="max-w-7xl mx-auto flex items-center justify-between px-6 py-6 relative"
       >
         <a href="/" className="flex items-center gap-2">
-          <div className="bg-[#FF6B35] text-white px-3 py-1 rounded-lg font-black text-xl">
-            Foody
-          </div>
+          <img 
+            src="/assets/headerlogo.png" 
+            alt="Foody Logo"
+            className="h-10"
+          />
         </a>
         <div className="hidden md:flex gap-8 text-sm font-medium">
           <a href="/#features" className="hover:text-[#FF6B35] transition-colors">Features</a>
@@ -91,7 +98,7 @@ export default function ContactPage() {
           <a href="/#testimonials" className="hover:text-[#FF6B35] transition-colors">Reviews</a>
           <a href="/contact" className="text-[#FF6B35] font-semibold">Contact</a>
         </div>
-        <div className="flex gap-2">
+        <div className="hidden md:flex gap-2">
           <a href="/" className="bg-[#FF6B35] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#FF5722] transition-colors flex items-center gap-2">
             <div className="text-base"><FaApple /></div>
             <div className="text-left">
@@ -107,7 +114,94 @@ export default function ContactPage() {
             </div>
           </a>
         </div>
+        {/* Mobile Menu Button */}
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="md:hidden text-[#2D241E] text-2xl focus:outline-none"
+          aria-label="Toggle menu"
+        >
+          {mobileMenuOpen ? <FaTimes /> : <FaBars />}
+        </button>
       </motion.nav>
+      
+      {/* Mobile Menu - Full Page */}
+      {mobileMenuOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="md:hidden fixed inset-0 bg-white z-[10000] overflow-y-auto"
+        >
+          <div className="flex flex-col min-h-full">
+            {/* Header with Close Button */}
+            <div className="flex items-center justify-between px-6 py-6 border-b border-gray-200">
+              <a href="/" className="flex items-center gap-2">
+                <img 
+                  src="/assets/headerlogo.png" 
+                  alt="Foody Logo"
+                  className="h-10"
+                />
+              </a>
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-[#2D241E] text-2xl focus:outline-none"
+                aria-label="Close menu"
+              >
+                <FaTimes />
+              </button>
+            </div>
+            
+            {/* Menu Content */}
+            <div className="flex-1 flex flex-col justify-center px-6 py-12 space-y-6">
+              <a 
+                href="/#features" 
+                className="block text-lg font-medium hover:text-[#FF6B35] transition-colors text-center"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Features
+              </a>
+              <a 
+                href="/#services" 
+                className="block text-lg font-medium hover:text-[#FF6B35] transition-colors text-center"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Services
+              </a>
+              <a 
+                href="/#testimonials" 
+                className="block text-lg font-medium hover:text-[#FF6B35] transition-colors text-center"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Reviews
+              </a>
+              <a 
+                href="/contact" 
+                className="block text-lg font-medium text-[#FF6B35] font-semibold text-center"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Contact
+              </a>
+              
+              <div className="pt-8 border-t border-gray-200 flex flex-col gap-4">
+                <a href="/" className="bg-[#FF6B35] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#FF5722] transition-colors flex items-center justify-center gap-2">
+                  <div className="text-base"><FaApple /></div>
+                  <div className="text-left">
+                    <div className="text-[10px] leading-tight">Download on the</div>
+                    <div className="text-xs font-bold leading-tight">App Store</div>
+                  </div>
+                </a>
+                <a href="/" className="bg-[#FF6B35] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#FF5722] transition-colors flex items-center justify-center gap-2">
+                  <div className="text-base"><FaAndroid /></div>
+                  <div className="text-left">
+                    <div className="text-[10px] leading-tight">Get it on</div>
+                    <div className="text-xs font-bold leading-tight">Google Play</div>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {/* HERO SECTION */}
       <section className="max-w-7xl mx-auto px-6 pt-12 pb-20">
@@ -318,9 +412,11 @@ export default function ContactPage() {
           <div className="grid md:grid-cols-4 gap-12 mb-12">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="bg-[#FF6B35] text-white px-3 py-1 rounded-lg font-black text-lg">
-                  Foody
-                </div>
+                <img 
+                  src="/assets/headerlogo.png" 
+                  alt="Foody Logo"
+                  className="h-8"
+                />
               </div>
               <p className="text-sm opacity-70 mb-4">
                 A unified platform that connects foodies for sharing, learning, and more.
