@@ -88,7 +88,7 @@ export default function ContactPage() {
         <a href="/" className="flex items-center gap-2">
           <img 
             src="/assets/headerlogo.png" 
-            alt="Foody Logo"
+            alt="Palapia Logo"
             className="h-10"
           />
         </a>
@@ -98,7 +98,7 @@ export default function ContactPage() {
           <a href="/#testimonials" className="hover:text-[#FF6B35] transition-colors">Reviews</a>
           <a href="/contact" className="text-[#FF6B35] font-semibold">Contact</a>
         </div>
-        <div className="hidden md:flex gap-2">
+        {/* <div className="hidden md:flex gap-2">
           <a href="/" className="bg-[#FF6B35] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#FF5722] transition-colors flex items-center gap-2">
             <div className="text-base"><FaApple /></div>
             <div className="text-left">
@@ -113,7 +113,7 @@ export default function ContactPage() {
               <div className="text-xs font-bold leading-tight">Google Play</div>
             </div>
           </a>
-        </div>
+        </div> */}
         {/* Mobile Menu Button */}
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -138,7 +138,7 @@ export default function ContactPage() {
               <a href="/" className="flex items-center gap-2">
                 <img 
                   src="/assets/headerlogo.png" 
-                  alt="Foody Logo"
+                  alt="Palapia Logo"
                   className="h-10"
                 />
               </a>
@@ -355,7 +355,7 @@ export default function ContactPage() {
               <ContactCard
                 icon={<div className="text-3xl text-[#FF6B35]"><FaEnvelope /></div>}
                 title="Email Us"
-                content="support@foodyapp.com"
+                content="support@palapiaapp.com"
                 description="We typically respond within 24 hours"
               />
               <ContactCard
@@ -373,7 +373,7 @@ export default function ContactPage() {
                   </div>
                 }
                 title="Social Media"
-                content="@FoodyApp"
+                content="@PalapiaApp"
                 description="Follow us for updates and cooking tips"
               />
               <ContactCard
@@ -394,7 +394,7 @@ export default function ContactPage() {
                 />
                 <FAQItem
                   question="Can I request a new feature?"
-                  answer="Absolutely! Select 'Feature Request' in the contact form and describe what you'd like to see in Foody."
+                  answer="Absolutely! Select 'Feature Request' in the contact form and describe what you'd like to see in Palapia."
                 />
                 <FAQItem
                   question="How long does support take to respond?"
@@ -414,7 +414,7 @@ export default function ContactPage() {
               <div className="flex items-center gap-2 mb-4">
                 <img 
                   src="/assets/headerlogo.png" 
-                  alt="Foody Logo"
+                  alt="Palapia Logo"
                   className="h-8"
                 />
               </div>
@@ -461,7 +461,7 @@ export default function ContactPage() {
           </div>
 
           <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-sm opacity-70">
-            <p>© 2025 Foody. Recipes are for everyone.</p>
+            <p>© 2025 Palapia. Recipes are for everyone.</p>
             <div className="flex gap-6">
               <a href="#" className="hover:opacity-100">Privacy Policy</a>
               <a href="#" className="hover:opacity-100">Terms & Conditions</a>

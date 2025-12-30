@@ -4,8 +4,46 @@ import { motion } from "framer-motion"
 import { useState } from "react"
 import { FaApple, FaGooglePlay, FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaBars, FaTimes } from "react-icons/fa"
 
-export default function FoodyLanding() {
+export default function PalapiaLanding() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [subscriptionName, setSubscriptionName] = useState("")
+  const [subscriptionEmail, setSubscriptionEmail] = useState("")
+  const [subscriptionLoading, setSubscriptionLoading] = useState(false)
+  const [subscriptionMessage, setSubscriptionMessage] = useState("")
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSubscriptionLoading(true)
+    setSubscriptionMessage("")
+
+    try {
+      const response = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: subscriptionName,
+          email: subscriptionEmail,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setSubscriptionMessage(data.message || 'Successfully subscribed!')
+        setSubscriptionName("")
+        setSubscriptionEmail("")
+        setTimeout(() => setSubscriptionMessage(""), 5000)
+      } else {
+        setSubscriptionMessage(data.error || 'Failed to subscribe. Please try again.')
+      }
+    } catch (error) {
+      setSubscriptionMessage('Failed to subscribe. Please try again.')
+    } finally {
+      setSubscriptionLoading(false)
+    }
+  }
 
   return (
     <div className="bg-[#FFF8F3] text-[#2D241E] overflow-hidden">
@@ -19,7 +57,7 @@ export default function FoodyLanding() {
         <div className="flex items-center gap-2">
           <img 
             src="/assets/headerlogo.png" 
-            alt="Foody Logo"
+            alt="Palapia Logo"
             className="h-10"
           />
         </div>
@@ -29,7 +67,7 @@ export default function FoodyLanding() {
           <a href="#testimonials" className="hover:text-[#FF6B35] transition-colors">Reviews</a>
           <a href="/contact" className="hover:text-[#FF6B35] transition-colors">Contact</a>
         </div>
-        <div className="hidden md:flex gap-2">
+        {/* <div className="hidden md:flex gap-2">
           <button className="bg-[#FF6B35] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#FF5722] transition-colors flex items-center gap-2">
             <div className="text-base"><FaApple /></div>
             <div className="text-left">
@@ -44,7 +82,7 @@ export default function FoodyLanding() {
               <div className="text-sm font-bold leading-tight">Google Play</div>
             </div>
           </button>
-        </div>
+        </div> */}
         {/* Mobile Menu Button */}
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -68,7 +106,7 @@ export default function FoodyLanding() {
             <div className="flex items-center justify-between px-6 py-6 border-b border-gray-200">
               <img 
                 src="/assets/headerlogo.png" 
-                alt="Foody Logo"
+                alt="Palapia Logo"
                 className="h-10"
               />
               <button
@@ -111,7 +149,7 @@ export default function FoodyLanding() {
                 Contact
               </a>
               
-              <div className="pt-8 border-t border-gray-200 flex flex-col gap-4">
+              {/* <div className="pt-8 border-t border-gray-200 flex flex-col gap-4">
                 <button className="bg-[#FF6B35] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#FF5722] transition-colors flex items-center justify-center gap-2">
                   <div className="text-base"><FaApple /></div>
                   <div className="text-left">
@@ -126,7 +164,7 @@ export default function FoodyLanding() {
                     <div className="text-sm font-bold leading-tight">Google Play</div>
                   </div>
                 </button>
-              </div>
+              </div> */}
             </div>
           </div>
         </motion.div>
@@ -146,7 +184,7 @@ export default function FoodyLanding() {
             <p className="text-lg text-[#8B7E74] mb-8 leading-relaxed">
               Save, organize, and share recipes with AI-powered tools. Join thousands of home cooks making meal planning effortless.
             </p>
-            <div className="flex gap-4 mb-8 justify-center lg:justify-start">
+            {/* <div className="flex gap-4 mb-8 justify-center lg:justify-start">
               <motion.button
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
@@ -169,6 +207,43 @@ export default function FoodyLanding() {
                   <div className="text-base font-bold">Google Play</div>
                 </div>
               </motion.button>
+            </div> */}
+            
+            {/* Email Subscription Form */}
+            <div className="mb-8">
+              <h3 className="text-lg font-semibold mb-4 text-center lg:text-left">Get Notified When We Launch</h3>
+              <form onSubmit={handleSubscribe} className="flex flex-col lg:flex-row gap-3 justify-center lg:justify-start">
+                <input
+                  type="text"
+                  placeholder="Your Name"
+                  value={subscriptionName}
+                  onChange={(e) => setSubscriptionName(e.target.value)}
+                  required
+                  className="px-4 py-3 rounded-xl border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF6B35] focus:border-transparent"
+                />
+                <input
+                  type="email"
+                  placeholder="Your Email"
+                  value={subscriptionEmail}
+                  onChange={(e) => setSubscriptionEmail(e.target.value)}
+                  required
+                  className="px-4 py-3 rounded-xl border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF6B35] focus:border-transparent"
+                />
+                <motion.button
+                  type="submit"
+                  disabled={subscriptionLoading}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="bg-[#FF6B35] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#FF5722] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {subscriptionLoading ? 'Subscribing...' : 'Subscribe'}
+                </motion.button>
+              </form>
+              {subscriptionMessage && (
+                <div className={`text-sm mt-2 text-center lg:text-left ${subscriptionMessage.includes('Successfully') ? 'text-green-600' : 'text-red-600'}`}>
+                  {subscriptionMessage}
+                </div>
+              )}
             </div>
           </motion.div>
 
@@ -182,7 +257,7 @@ export default function FoodyLanding() {
             <div className="relative z-10 max-w-sm mx-auto lg:mx-0">
               <img 
                 src="/assets/recipepage.jpeg" 
-                alt="Foody App Screenshot"
+                alt="Palapia App Screenshot"
                 className="w-auto h-[500px] rounded-[2.5rem] shadow-2xl mx-auto"
               />
             </div>
@@ -240,7 +315,7 @@ export default function FoodyLanding() {
             {/* <div className="relative z-10 max-w-sm mx-auto"> */}
               <img 
                 src="/assets/addrecipesoptions.jpeg" 
-                alt="Foody App Screenshot"
+                alt="Palapia App Screenshot"
                 className="w-auto h-[500px] rounded-[2.5rem] shadow-2xl mx-auto"
               />
             {/* </div> */}
@@ -301,7 +376,7 @@ export default function FoodyLanding() {
                 Effortless living with trusted recipes
               </h2>
               <p className="text-[#8B7E74] mb-8 leading-relaxed">
-                Join thousands of home cooks who are making meal planning simpler. Whether you&apos;re a beginner or a pro chef, Foody makes cooking enjoyable.
+                Join thousands of home cooks who are making meal planning simpler. Whether you&apos;re a beginner or a pro chef, Palapia makes cooking enjoyable.
               </p>
               <motion.button
                 whileHover={{ scale: 1.03 }}
@@ -349,7 +424,7 @@ export default function FoodyLanding() {
               From booking to payment <br />here&apos;s how
             </h2>
             <p className="text-[#8B7E74] max-w-2xl mx-auto mb-16">
-              Easily cook meals like a service professional by following recipes at your own pace. Foody makes every step seamless and enjoyable.
+              Easily cook meals like a service professional by following recipes at your own pace. Palapia makes every step seamless and enjoyable.
             </p>
           </motion.div>
 
@@ -437,7 +512,7 @@ export default function FoodyLanding() {
               Recipe management made easy <br />hear it straight from our users
             </h2>
             <p className="text-[#8B7E74] max-w-2xl mx-auto">
-              Every cook is a critic but we&apos;ve received amazing love from thousands of home cooks using Foody every day to make meals easy.
+              Every cook is a critic but we&apos;ve received amazing love from thousands of home cooks using Palapia every day to make meals easy.
             </p>
           </motion.div>
 
@@ -480,7 +555,7 @@ export default function FoodyLanding() {
               <p className="text-white/90 mb-8 text-lg leading-relaxed">
                 Quick, smart recipe tool that puts you on track to cooking success. Accessible with just one tap, you can easily manage all your recipes, meal plans, and cooking adventures in one beautiful app.
               </p>
-              <div className="flex gap-4">
+              {/* <div className="flex gap-4">
                 <motion.button
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.98 }}
@@ -503,7 +578,7 @@ export default function FoodyLanding() {
                     <div className="text-base font-bold">Google Play</div>
                   </div>
                 </motion.button>
-              </div>
+              </div> */}
             </motion.div>
 
             <motion.div
@@ -537,7 +612,7 @@ export default function FoodyLanding() {
               <div className="flex items-center gap-2 mb-4">
                 <img 
                   src="/assets/headerlogo.png" 
-                  alt="Foody Logo"
+                  alt="Palapia Logo"
                   className="h-8"
                 />
               </div>
@@ -584,7 +659,7 @@ export default function FoodyLanding() {
           </div>
 
           <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-sm opacity-70">
-            <p>© 2025 Foody. Recipes are for everyone.</p>
+            <p>© 2025 Palapia. Recipes are for everyone.</p>
             <div className="flex gap-6">
               <a href="#" className="hover:opacity-100">Privacy Policy</a>
               <a href="#" className="hover:opacity-100">Terms & Conditions</a>

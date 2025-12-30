@@ -1,6 +1,6 @@
 /**
  * Achievement Definitions
- * Source of truth for all achievements in Foody
+ * Source of truth for all achievements in Palapia
  */
 
 export interface AchievementTier {

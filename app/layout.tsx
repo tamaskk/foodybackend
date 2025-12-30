@@ -10,11 +10,11 @@ const bitter = Bitter({
 });
   
 export const metadata: Metadata = {
-  title: "Foody - AI-Powered Recipe Management",
+  title: "Palapia - AI-Powered Recipe Management",
   description: "Save, create, and share recipes effortlessly. AI-powered recipe import from social media, photo analysis, and smart meal planning.",
   keywords: "recipe app, cooking, meal planning, AI recipes, food, social cooking",
   openGraph: {
-    title: "Foody - AI-Powered Recipe Management",
+    title: "Palapia - AI-Powered Recipe Management",
     description: "Save, create, and share recipes effortlessly with AI",
     type: "website",
   },

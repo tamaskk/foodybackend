@@ -89,6 +89,13 @@ interface Contact {
   createdAt: string;
 }
 
+interface Subscription {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: string;
+}
+
 interface Pagination {
   page: number;
   limit: number;
@@ -96,7 +103,7 @@ interface Pagination {
   totalPages: number;
 }
 
-type Tab = 'dashboard' | 'users' | 'posts' | 'recipes' | 'notifications' | 'contacts';
+type Tab = 'dashboard' | 'users' | 'posts' | 'recipes' | 'notifications' | 'contacts' | 'subscriptions';
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -109,6 +116,7 @@ export default function AdminDashboard() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   
   // Pagination states
   const [usersPagination, setUsersPagination] = useState<Pagination>({ page: 1, limit: 20, total: 0, totalPages: 1 });
@@ -116,6 +124,7 @@ export default function AdminDashboard() {
   const [recipesPagination, setRecipesPagination] = useState<Pagination>({ page: 1, limit: 20, total: 0, totalPages: 1 });
   const [notificationsPagination, setNotificationsPagination] = useState<Pagination>({ page: 1, limit: 20, total: 0, totalPages: 1 });
   const [contactsPagination, setContactsPagination] = useState<Pagination>({ page: 1, limit: 20, total: 0, totalPages: 1 });
+  const [subscriptionsPagination, setSubscriptionsPagination] = useState<Pagination>({ page: 1, limit: 50, total: 0, totalPages: 1 });
   
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -157,8 +166,10 @@ export default function AdminDashboard() {
       loadNotifications();
     } else if (activeTab === 'contacts') {
       loadContacts();
+    } else if (activeTab === 'subscriptions') {
+      loadSubscriptions();
     }
-  }, [activeTab, searchQuery, userFilter, postFilter, recipeFilter, notificationFilter, contactFilter, usersPagination.page, postsPagination.page, recipesPagination.page, notificationsPagination.page, contactsPagination.page]);
+  }, [activeTab, searchQuery, userFilter, postFilter, recipeFilter, notificationFilter, contactFilter, usersPagination.page, postsPagination.page, recipesPagination.page, notificationsPagination.page, contactsPagination.page, subscriptionsPagination.page]);
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem('adminToken');
@@ -293,6 +304,24 @@ export default function AdminDashboard() {
     }
   };
 
+  const loadSubscriptions = async () => {
+    setLoading(true);
+    try {
+      const url = `/api/admin/subscriptions?page=${subscriptionsPagination.page}&limit=${subscriptionsPagination.limit}`;
+      
+      const response = await fetch(url, { headers: getAuthHeaders() });
+      if (response.ok) {
+        const data = await response.json();
+        setSubscriptions(data.subscriptions);
+        setSubscriptionsPagination(prev => ({ ...prev, ...data.pagination }));
+      }
+    } catch (error) {
+      console.error('Failed to load subscriptions:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleDelete = async (type: string, id: string) => {
     if (!confirm(`Are you sure you want to delete this ${type}?`)) return;
 
@@ -308,6 +337,8 @@ export default function AdminDashboard() {
         else if (type === 'posts') loadPosts();
         else if (type === 'recipes') loadRecipes();
         else if (type === 'notifications') loadNotifications();
+        else if (type === 'contacts') loadContacts();
+        else if (type === 'subscriptions') loadSubscriptions();
       } else {
         alert(`Failed to delete ${type}`);
       }
@@ -417,6 +448,7 @@ export default function AdminDashboard() {
     else if (tab === 'recipes') setRecipesPagination(prev => ({ ...prev, page: newPage }));
     else if (tab === 'notifications') setNotificationsPagination(prev => ({ ...prev, page: newPage }));
     else if (tab === 'contacts') setContactsPagination(prev => ({ ...prev, page: newPage }));
+    else if (tab === 'subscriptions') setSubscriptionsPagination(prev => ({ ...prev, page: newPage }));
   };
 
   const clearFilters = () => {
@@ -447,7 +479,7 @@ export default function AdminDashboard() {
       <div className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4">
           <nav className="flex space-x-8">
-            {(['dashboard', 'users', 'posts', 'recipes', 'notifications', 'contacts'] as Tab[]).map((tab) => (
+            {(['dashboard', 'users', 'posts', 'recipes', 'notifications', 'contacts', 'subscriptions'] as Tab[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => {
@@ -723,6 +755,14 @@ export default function AdminDashboard() {
           <>
             <ContactTable contacts={contacts} loading={loading} onDelete={handleDelete} onStatusChange={handleEdit} />
             <Paginator pagination={contactsPagination} onPageChange={(page) => changePage('contacts', page)} />
+          </>
+        )}
+
+        {/* Subscriptions Table with Pagination */}
+        {activeTab === 'subscriptions' && (
+          <>
+            <SubscriptionTable subscriptions={subscriptions} loading={loading} onDelete={handleDelete} />
+            <Paginator pagination={subscriptionsPagination} onPageChange={(page) => changePage('subscriptions', page)} />
           </>
         )}
       </main>
@@ -1925,6 +1965,63 @@ function ContactTable({ contacts, loading, onDelete, onStatusChange }: any) {
                   <button
                     onClick={() => onDelete('contacts', contact.id)}
                     className="text-red-600 hover:text-red-900 font-semibold"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// Component: SubscriptionTable
+function SubscriptionTable({ subscriptions, loading, onDelete }: any) {
+  return (
+    <div className="bg-white shadow rounded-lg overflow-hidden">
+      <div className="px-6 py-4 border-b border-gray-200">
+        <h2 className="text-lg font-bold text-gray-900">Email Subscriptions ({subscriptions.length})</h2>
+        <p className="text-sm text-gray-600 mt-1">Users who subscribed to be notified when the app launches</p>
+      </div>
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Name</th>
+            <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Email</th>
+            <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Subscribed Date</th>
+            <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Actions</th>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {loading ? (
+            <tr>
+              <td colSpan={4} className="px-6 py-4 text-center text-gray-900">Loading...</td>
+            </tr>
+          ) : subscriptions.length === 0 ? (
+            <tr>
+              <td colSpan={4} className="px-6 py-4 text-center text-gray-900">No subscriptions found</td>
+            </tr>
+          ) : (
+            subscriptions.map((subscription: Subscription) => (
+              <tr key={subscription.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap text-gray-900 font-medium">{subscription.name}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-gray-900">{subscription.email}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-gray-900">
+                  {new Date(subscription.createdAt).toLocaleDateString()} {new Date(subscription.createdAt).toLocaleTimeString()}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <a
+                    href={`mailto:${subscription.email}?subject=Welcome to Palapia!`}
+                    className="text-[#FF6B35] hover:text-[#FF5722] font-semibold mr-4"
+                  >
+                    Email
+                  </a>
+                  <button
+                    onClick={() => onDelete('subscriptions', subscription.id)}
+                    className="text-red-600 hover:text-red-800 font-semibold"
                   >
                     Delete
                   </button>
