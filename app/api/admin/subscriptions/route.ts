@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
       .limit(limit)
       .lean();
 
-    const formattedSubscriptions = subscriptions.map(sub => ({
+    const formattedSubscriptions = subscriptions.map((sub: any) => ({
       id: sub._id.toString(),
       name: sub.name,
       email: sub.email,
