@@ -3,7 +3,7 @@ import connectDB from '@/lib/db';
 import EmailSubscription from '@/models/EmailSubscription';
 import { verifyToken } from '@/lib/jwt';
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   await connectDB();
 
   try {
@@ -17,7 +17,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       return NextResponse.json({ error: 'Unauthorized: Not an admin' }, { status: 403 });
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     const subscription = await EmailSubscription.findByIdAndDelete(id).lean();
 
