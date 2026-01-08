@@ -4,10 +4,11 @@ export interface INotification extends Document {
   userId: mongoose.Types.ObjectId; // User who receives the notification
   title: string; // Notification title
   message: string; // Notification message
-  type: 'info' | 'warning' | 'success' | 'error' | 'follow_request' | 'follow_accepted' | 'post_like' | 'post_comment';
+  type: 'info' | 'warning' | 'success' | 'error' | 'follow_request' | 'follow_accepted' | 'post_like' | 'post_comment' | 'achievement';
   sentBy?: string; // Email/name of sender (for admin notifications)
   fromUserId?: mongoose.Types.ObjectId; // User who triggered the notification (for social notifications)
   relatedId?: string; // ID of related entity (post, follow request, etc.)
+  metadata?: Record<string, any>; // Additional metadata (e.g., for achievement notifications)
   read: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -31,7 +32,7 @@ const NotificationSchema = new Schema<INotification>(
     },
     type: {
       type: String,
-      enum: ['info', 'warning', 'success', 'error', 'follow_request', 'follow_accepted', 'post_like', 'post_comment'],
+      enum: ['info', 'warning', 'success', 'error', 'follow_request', 'follow_accepted', 'post_like', 'post_comment', 'achievement'],
       required: true,
     },
     sentBy: {
@@ -43,6 +44,10 @@ const NotificationSchema = new Schema<INotification>(
     },
     relatedId: {
       type: String,
+    },
+    metadata: {
+      type: Schema.Types.Mixed,
+      default: null,
     },
     read: {
       type: Boolean,

@@ -19,6 +19,7 @@ export interface IRecipe extends Document {
   links: string[];
   createdAt: Date;
   updatedAt: Date;
+  originalRecipeId?: mongoose.Types.ObjectId;
 }
 
 const RecipeSchema = new Schema<IRecipe>(
@@ -92,6 +93,11 @@ const RecipeSchema = new Schema<IRecipe>(
     links: {
       type: [String],
       default: [],
+    },
+    originalRecipeId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Recipe',
+      index: true,
     },
   },
   {

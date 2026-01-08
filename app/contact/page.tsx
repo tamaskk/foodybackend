@@ -76,22 +76,74 @@ export default function ContactPage() {
     })
   }
 
+  // Add structured data for contact page
+  const siteUrl = typeof window !== 'undefined' ? window.location.origin : 'https://palapia.com'
+  
+  const contactPageJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    "name": "Contact Palapia",
+    "description": "Get in touch with Palapia support team. We're here to help with questions, feedback, and support.",
+    "url": `${siteUrl}/contact`,
+    "mainEntity": {
+      "@type": "Organization",
+      "name": "Palapia",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "Customer Support",
+        "email": "support@palapiaapp.com",
+        "availableLanguage": "English",
+      },
+    },
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": siteUrl,
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Contact",
+        "item": `${siteUrl}/contact`,
+      },
+    ],
+  };
+
   return (
-    <div className="bg-[#FFF8F3] text-[#2D241E] min-h-screen">
-      {/* NAVBAR */}
-      <motion.nav
-        initial={{ y: -30, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6 }}
-        className="max-w-7xl mx-auto flex items-center justify-between px-6 py-6 relative"
-      >
-        <a href="/" className="flex items-center gap-2">
-          <img 
-            src="/assets/headerlogo.png" 
-            alt="Palapia Logo"
-            className="h-10"
-          />
-        </a>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(contactPageJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <div className="bg-[#FFF8F3] text-[#2D241E] min-h-screen">
+        {/* NAVBAR */}
+        <motion.nav
+          initial={{ y: -30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.6 }}
+          className="max-w-7xl mx-auto flex items-center justify-between px-6 py-6 relative"
+        >
+          <a href="/" className="flex items-center gap-2">
+            <img 
+              src="/assets/headerlogo.png" 
+              alt="Palapia Logo - AI-Powered Recipe Management App"
+              className="h-10"
+              width={120}
+              height={40}
+              loading="eager"
+            />
+          </a>
         <div className="hidden md:flex gap-8 text-sm font-medium">
           <a href="/#features" className="hover:text-[#FF6B35] transition-colors">Features</a>
           <a href="/#services" className="hover:text-[#FF6B35] transition-colors">Services</a>
@@ -140,6 +192,8 @@ export default function ContactPage() {
                   src="/assets/headerlogo.png" 
                   alt="Palapia Logo"
                   className="h-10"
+                  width={120}
+                  height={40}
                 />
               </a>
               <button
@@ -416,6 +470,8 @@ export default function ContactPage() {
                   src="/assets/headerlogo.png" 
                   alt="Palapia Logo"
                   className="h-8"
+                  width={120}
+                  height={32}
                 />
               </div>
               <p className="text-sm opacity-70 mb-4">
@@ -470,6 +526,7 @@ export default function ContactPage() {
         </div>
       </footer>
     </div>
+    </>
   )
 }
 

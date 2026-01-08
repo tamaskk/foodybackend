@@ -3,7 +3,9 @@
 import { motion } from "framer-motion"
 import { useState } from "react"
 import { FaApple, FaGooglePlay, FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaBars, FaTimes } from "react-icons/fa"
+import type { Metadata } from "next"
 
+// Note: Metadata export doesn't work with "use client" - handled in layout
 export default function PalapiaLanding() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [subscriptionName, setSubscriptionName] = useState("")
@@ -45,253 +47,284 @@ export default function PalapiaLanding() {
     }
   }
 
-  return (
-    <div className="bg-[#FFF8F3] text-[#2D241E] overflow-hidden">
-      {/* NAVBAR */}
-      <motion.nav
-        initial={{ y: -30, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6 }}
-        className="max-w-7xl mx-auto flex items-center justify-between px-6 py-6 relative"
-      >
-        <div className="flex items-center gap-2">
-          <img 
-            src="/assets/headerlogo.png" 
-            alt="Palapia Logo"
-            className="h-10"
-          />
-        </div>
-        <div className="hidden md:flex gap-8 text-sm font-medium">
-          <a href="#features" className="hover:text-[#FF6B35] transition-colors">Features</a>
-          <a href="#services" className="hover:text-[#FF6B35] transition-colors">Services</a>
-          <a href="#testimonials" className="hover:text-[#FF6B35] transition-colors">Reviews</a>
-          <a href="/contact" className="hover:text-[#FF6B35] transition-colors">Contact</a>
-        </div>
-        {/* <div className="hidden md:flex gap-2">
-          <button className="bg-[#FF6B35] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#FF5722] transition-colors flex items-center gap-2">
-            <div className="text-base"><FaApple /></div>
-            <div className="text-left">
-              <div className="text-[10px] leading-tight">Download on the</div>
-              <div className="text-sm font-bold leading-tight">App Store</div>
-            </div>
-          </button>
-          <button className="bg-[#FF6B35] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#FF5722] transition-colors flex items-center gap-2">
-            <div className="text-base"><FaGooglePlay /></div>
-            <div className="text-left">
-              <div className="text-[10px] leading-tight">Get it on</div>
-              <div className="text-sm font-bold leading-tight">Google Play</div>
-            </div>
-          </button>
-        </div> */}
-        {/* Mobile Menu Button */}
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden text-[#2D241E] text-2xl focus:outline-none"
-          aria-label="Toggle menu"
-        >
-          {mobileMenuOpen ? <FaTimes /> : <FaBars />}
-        </button>
-      </motion.nav>
-      
-      {/* Mobile Menu - Full Page */}
-      {mobileMenuOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="md:hidden fixed inset-0 bg-white z-[10000] overflow-y-auto"
-        >
-          <div className="flex flex-col min-h-full">
-            {/* Header with Close Button */}
-            <div className="flex items-center justify-between px-6 py-6 border-b border-gray-200">
-              <img 
-                src="/assets/headerlogo.png" 
-                alt="Palapia Logo"
-                className="h-10"
-              />
-              <button
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-[#2D241E] text-2xl focus:outline-none"
-                aria-label="Close menu"
-              >
-                <FaTimes />
-              </button>
-            </div>
-            
-            {/* Menu Content */}
-            <div className="flex-1 flex flex-col justify-center px-6 py-12 space-y-6">
-              <a 
-                href="#features" 
-                className="block text-lg font-medium hover:text-[#FF6B35] transition-colors text-center"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Features
-              </a>
-              <a 
-                href="#services" 
-                className="block text-lg font-medium hover:text-[#FF6B35] transition-colors text-center"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Services
-              </a>
-              <a 
-                href="#testimonials" 
-                className="block text-lg font-medium hover:text-[#FF6B35] transition-colors text-center"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Reviews
-              </a>
-              <a 
-                href="/contact" 
-                className="block text-lg font-medium hover:text-[#FF6B35] transition-colors text-center"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Contact
-              </a>
-              
-              {/* <div className="pt-8 border-t border-gray-200 flex flex-col gap-4">
-                <button className="bg-[#FF6B35] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#FF5722] transition-colors flex items-center justify-center gap-2">
-                  <div className="text-base"><FaApple /></div>
-                  <div className="text-left">
-                    <div className="text-[10px] leading-tight">Download on the</div>
-                    <div className="text-sm font-bold leading-tight">App Store</div>
-                  </div>
-                </button>
-                <button className="bg-[#FF6B35] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#FF5722] transition-colors flex items-center justify-center gap-2">
-                  <div className="text-base"><FaGooglePlay /></div>
-                  <div className="text-left">
-                    <div className="text-[10px] leading-tight">Get it on</div>
-                    <div className="text-sm font-bold leading-tight">Google Play</div>
-                  </div>
-                </button>
-              </div> */}
-            </div>
-          </div>
-        </motion.div>
-      )}
+  // Add structured data for the landing page
+  const siteUrl = typeof window !== 'undefined' ? window.location.origin : 'https://palapia.com'
+  
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": siteUrl,
+      },
+    ],
+  };
 
-      {/* HERO */}
-      <section className="max-w-7xl mx-auto px-6 pt-12 pb-20">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <div className="bg-[#FFF8F3] text-[#2D241E] overflow-hidden">
+        {/* NAVBAR */}
+        <motion.nav
+          initial={{ y: -30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.6 }}
+          className="max-w-7xl mx-auto flex items-center justify-between px-6 py-6 relative"
+        >
+          <div className="flex items-center gap-2">
+            <img 
+              src="/assets/headerlogo.png" 
+              alt="Palapia Logo - AI-Powered Recipe Management App"
+              className="h-10"
+              width={120}
+              height={40}
+              loading="eager"
+            />
+          </div>
+          <div className="hidden md:flex gap-8 text-sm font-medium">
+            <a href="#features" className="hover:text-[#FF6B35] transition-colors">Features</a>
+            <a href="#services" className="hover:text-[#FF6B35] transition-colors">Services</a>
+            <a href="#testimonials" className="hover:text-[#FF6B35] transition-colors">Reviews</a>
+            <a href="/contact" className="hover:text-[#FF6B35] transition-colors">Contact</a>
+          </div>
+          {/* <div className="hidden md:flex gap-2">
+            <button className="bg-[#FF6B35] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#FF5722] transition-colors flex items-center gap-2">
+              <div className="text-base"><FaApple /></div>
+              <div className="text-left">
+                <div className="text-[10px] leading-tight">Download on the</div>
+                <div className="text-sm font-bold leading-tight">App Store</div>
+              </div>
+            </button>
+            <button className="bg-[#FF6B35] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#FF5722] transition-colors flex items-center gap-2">
+              <div className="text-base"><FaGooglePlay /></div>
+              <div className="text-left">
+                <div className="text-[10px] leading-tight">Get it on</div>
+                <div className="text-sm font-bold leading-tight">Google Play</div>
+              </div>
+            </button>
+          </div> */}
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden text-[#2D241E] text-2xl focus:outline-none"
+            aria-label="Toggle menu"
           >
-            <h1 className="text-5xl lg:text-6xl font-black leading-tight mb-6">
-              Your Trusted Partner for <span className="text-[#FF6B35]">Recipe Management</span>
-            </h1>
-            <p className="text-lg text-[#8B7E74] mb-8 leading-relaxed">
-              Save, organize, and share recipes with AI-powered tools. Join thousands of home cooks making meal planning effortless.
-            </p>
-            {/* <div className="flex gap-4 mb-8 justify-center lg:justify-start">
-              <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.98 }}
-                className="bg-black text-white px-6 py-3 rounded-xl font-medium flex items-center gap-3"
-              >
-                <div className="text-xl"><FaApple /></div>
-                <div className="text-left">
-                  <div className="text-xs">Download on the</div>
-                  <div className="text-base font-bold">App Store</div>
-                </div>
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.98 }}
-                className="bg-black text-white px-6 py-3 rounded-xl font-medium flex items-center gap-3"
-              >
-                <div className="text-xl"><FaGooglePlay /></div>
-                <div className="text-left">
-                  <div className="text-xs">Get it on</div>
-                  <div className="text-base font-bold">Google Play</div>
-                </div>
-              </motion.button>
-            </div> */}
-            
-            {/* Email Subscription Form */}
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold mb-4 text-center lg:text-left">Get Notified When We Launch</h3>
-              <form onSubmit={handleSubscribe} className="flex flex-col lg:flex-row gap-3 justify-center lg:justify-start">
-                <input
-                  type="text"
-                  placeholder="Your Name"
-                  value={subscriptionName}
-                  onChange={(e) => setSubscriptionName(e.target.value)}
-                  required
-                  className="px-4 py-3 rounded-xl border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF6B35] focus:border-transparent"
+            {mobileMenuOpen ? <FaTimes /> : <FaBars />}
+          </button>
+        </motion.nav>
+        
+        {/* Mobile Menu - Full Page */}
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="md:hidden fixed inset-0 bg-white z-[10000] overflow-y-auto"
+          >
+            <div className="flex flex-col min-h-full">
+              {/* Header with Close Button */}
+              <div className="flex items-center justify-between px-6 py-6 border-b border-gray-200">
+                <img 
+                  src="/assets/headerlogo.png" 
+                  alt="Palapia Logo"
+                  className="h-10"
+                  width={120}
+                  height={40}
                 />
-                <input
-                  type="email"
-                  placeholder="Your Email"
-                  value={subscriptionEmail}
-                  onChange={(e) => setSubscriptionEmail(e.target.value)}
-                  required
-                  className="px-4 py-3 rounded-xl border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF6B35] focus:border-transparent"
-                />
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-[#2D241E] text-2xl focus:outline-none"
+                  aria-label="Close menu"
+                >
+                  <FaTimes />
+                </button>
+              </div>
+              
+              {/* Menu Content */}
+              <div className="flex-1 flex flex-col justify-center px-6 py-12 space-y-6">
+                <a 
+                  href="#features" 
+                  className="block text-lg font-medium hover:text-[#FF6B35] transition-colors text-center"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Features
+                </a>
+                <a 
+                  href="#services" 
+                  className="block text-lg font-medium hover:text-[#FF6B35] transition-colors text-center"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Services
+                </a>
+                <a 
+                  href="#testimonials" 
+                  className="block text-lg font-medium hover:text-[#FF6B35] transition-colors text-center"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Reviews
+                </a>
+                <a 
+                  href="/contact" 
+                  className="block text-lg font-medium hover:text-[#FF6B35] transition-colors text-center"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Contact
+                </a>
+                
+                {/* <div className="pt-8 border-t border-gray-200 flex flex-col gap-4">
+                  <button className="bg-[#FF6B35] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#FF5722] transition-colors flex items-center justify-center gap-2">
+                    <div className="text-base"><FaApple /></div>
+                    <div className="text-left">
+                      <div className="text-[10px] leading-tight">Download on the</div>
+                      <div className="text-sm font-bold leading-tight">App Store</div>
+                    </div>
+                  </button>
+                  <button className="bg-[#FF6B35] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#FF5722] transition-colors flex items-center justify-center gap-2">
+                    <div className="text-base"><FaGooglePlay /></div>
+                    <div className="text-left">
+                      <div className="text-[10px] leading-tight">Get it on</div>
+                      <div className="text-sm font-bold leading-tight">Google Play</div>
+                    </div>
+                  </button>
+                </div> */}
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* HERO */}
+        <section className="max-w-7xl mx-auto px-6 pt-12 pb-20">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7 }}
+            >
+              <h1 className="text-5xl lg:text-6xl font-black leading-tight mb-6">
+                Your Trusted Partner for <span className="text-[#FF6B35]">Recipe Management</span>
+              </h1>
+              <p className="text-lg text-[#8B7E74] mb-8 leading-relaxed">
+                Save, organize, and share recipes with AI-powered tools. Join thousands of home cooks making meal planning effortless.
+              </p>
+              {/* <div className="flex gap-4 mb-8 justify-center lg:justify-start">
                 <motion.button
-                  type="submit"
-                  disabled={subscriptionLoading}
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.98 }}
-                  className="bg-[#FF6B35] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#FF5722] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-black text-white px-6 py-3 rounded-xl font-medium flex items-center gap-3"
                 >
-                  {subscriptionLoading ? 'Subscribing...' : 'Subscribe'}
+                  <div className="text-xl"><FaApple /></div>
+                  <div className="text-left">
+                    <div className="text-xs">Download on the</div>
+                    <div className="text-base font-bold">App Store</div>
+                  </div>
                 </motion.button>
-              </form>
-              {subscriptionMessage && (
-                <div className={`text-sm mt-2 text-center lg:text-left ${subscriptionMessage.includes('Successfully') ? 'text-green-600' : 'text-red-600'}`}>
-                  {subscriptionMessage}
-                </div>
-              )}
-            </div>
-          </motion.div>
+                <motion.button
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="bg-black text-white px-6 py-3 rounded-xl font-medium flex items-center gap-3"
+                >
+                  <div className="text-xl"><FaGooglePlay /></div>
+                  <div className="text-left">
+                    <div className="text-xs">Get it on</div>
+                    <div className="text-base font-bold">Google Play</div>
+                  </div>
+                </motion.button>
+              </div> */}
+              
+              {/* Email Subscription Form */}
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold mb-4 text-center lg:text-left">Get Notified When We Launch</h3>
+                <form onSubmit={handleSubscribe} className="flex flex-col lg:flex-row gap-3 justify-center lg:justify-start">
+                  <input
+                    type="text"
+                    placeholder="Your Name"
+                    value={subscriptionName}
+                    onChange={(e) => setSubscriptionName(e.target.value)}
+                    required
+                    className="px-4 py-3 rounded-xl border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF6B35] focus:border-transparent"
+                    aria-label="Your Name"
+                  />
+                  <input
+                    type="email"
+                    placeholder="Your Email"
+                    value={subscriptionEmail}
+                    onChange={(e) => setSubscriptionEmail(e.target.value)}
+                    required
+                    className="px-4 py-3 rounded-xl border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF6B35] focus:border-transparent"
+                    aria-label="Your Email"
+                  />
+                  <motion.button
+                    type="submit"
+                    disabled={subscriptionLoading}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="bg-[#FF6B35] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#FF5722] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {subscriptionLoading ? 'Subscribing...' : 'Subscribe'}
+                  </motion.button>
+                </form>
+                {subscriptionMessage && (
+                  <div className={`text-sm mt-2 text-center lg:text-left ${subscriptionMessage.includes('Successfully') ? 'text-green-600' : 'text-red-600'}`}>
+                    {subscriptionMessage}
+                  </div>
+                )}
+              </div>
+            </motion.div>
 
-          {/* HERO PHONE MOCK */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="relative flex justify-start lg:justify-center lg:ml-8"
-          >
-            <div className="relative z-10 max-w-sm mx-auto lg:mx-0">
-              <img 
-                src="/assets/recipepage.jpeg" 
-                alt="Palapia App Screenshot"
-                className="w-auto h-[500px] rounded-[2.5rem] shadow-2xl mx-auto"
-              />
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Partner Logos */}
-        {/* <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.4 }}
-          className="mt-16 pt-8 border-t border-gray-200"
-        >
-          <div className="flex justify-center items-center gap-12 flex-wrap opacity-40">
-            <LogoText text="TikTok" />
-            <LogoText text="Instagram" />
-            <LogoText text="OpenAI" />
-            <LogoText text="Firebase" />
-            <LogoText text="Stripe" />
-          </div>
-        </motion.div> */}
-      </section>
-
-      {/* FEATURE 1 - MY CART / SAVED RECIPES */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* HERO PHONE MOCK */}
             <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="relative flex justify-center lg:justify-start"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.7, delay: 0.2 }}
+              className="relative flex justify-start lg:justify-center lg:ml-8"
             >
-              <div className="bg-[#FF6B35] w-fit mx-auto lg:mx-0 rounded-[3rem] p-8 lg:p-12 flex flex-col items-center justify-center">
+              <div className="relative z-10 max-w-sm mx-auto lg:mx-0">
+                <img 
+                  src="/assets/recipepage.jpeg" 
+                  alt="Palapia Recipe App Screenshot - View recipe details and cooking instructions"
+                  className="w-auto h-[500px] rounded-[2.5rem] shadow-2xl mx-auto"
+                  width={400}
+                  height={500}
+                  loading="eager"
+                />
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Partner Logos */}
+          {/* <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.4 }}
+            className="mt-16 pt-8 border-t border-gray-200"
+          >
+            <div className="flex justify-center items-center gap-12 flex-wrap opacity-40">
+              <LogoText text="TikTok" />
+              <LogoText text="Instagram" />
+              <LogoText text="OpenAI" />
+              <LogoText text="Firebase" />
+              <LogoText text="Stripe" />
+            </div>
+          </motion.div> */}
+        </section>
+
+        {/* FEATURE 1 - MY CART / SAVED RECIPES */}
+        <section id="features" className="py-20">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
+              <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                className="relative flex justify-center lg:justify-start"
+              >
+                <div className="bg-[#FF6B35] w-fit mx-auto lg:mx-0 rounded-[3rem] p-8 lg:p-12 flex flex-col items-center justify-center">
                 {/* <PhoneMockup bgColor="white">
                   <div className="p-4">
                     <h3 className="font-bold text-lg mb-4">My Saved</h3>
@@ -315,8 +348,11 @@ export default function PalapiaLanding() {
             {/* <div className="relative z-10 max-w-sm mx-auto"> */}
               <img 
                 src="/assets/addrecipesoptions.jpeg" 
-                alt="Palapia App Screenshot"
+                alt="Palapia App - Add recipes from multiple sources including social media and photos"
                 className="w-auto h-[500px] rounded-[2.5rem] shadow-2xl mx-auto"
+                width={400}
+                height={500}
+                loading="lazy"
               />
             {/* </div> */}
                 
@@ -401,8 +437,11 @@ export default function PalapiaLanding() {
             >
               <img 
                 src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=600&h=700&fit=crop" 
-                alt="Cooking together"
+                alt="People cooking together in a modern kitchen"
                 className="rounded-3xl shadow-2xl w-full max-w-sm mx-auto lg:mx-0 object-cover"
+                width={600}
+                height={700}
+                loading="lazy"
               />
             </motion.div>
           </div>
@@ -455,8 +494,11 @@ export default function PalapiaLanding() {
             >
               <img 
                 src="/assets/feed.jpeg" 
-                alt="Recipe Page Screenshot"
+                alt="Palapia Recipe Feed - Browse and discover new recipes from the community"
                 className="w-auto h-[700px] max-h-[700px] rounded-[2.5rem] shadow-2xl mx-auto"
+                width={400}
+                height={700}
+                loading="lazy"
               />
             </motion.div>
           </div>
@@ -470,8 +512,11 @@ export default function PalapiaLanding() {
             >
               <img 
                 src="/assets/profilepage.jpeg" 
-                alt="Recipe Page Screenshot"
+                alt="Palapia User Profile - Track your cooking achievements and saved recipes"
                 className="w-auto h-[700px] max-h-[700px] rounded-[2.5rem] shadow-2xl mx-auto lg:mx-0"
+                width={400}
+                height={700}
+                loading="lazy"
               />
             </motion.div>
 
@@ -590,13 +635,19 @@ export default function PalapiaLanding() {
               <div className="grid grid-cols-2 gap-4 lg:gap-20 mx-auto lg:mx-0">
                   <img 
                     src="/assets/newrecipeaddIngredients.jpeg" 
-                    alt="Recipe Page Screenshot"
+                    alt="Palapia Recipe Creation - Add ingredients and create custom recipes"
                     className="w-auto h-[400px] max-h-[400px] rounded-[2.5rem] shadow-2xl"
+                    width={300}
+                    height={400}
+                    loading="lazy"
                   />
                   <img 
                     src="/assets/recipedetails.jpeg" 
-                    alt="Recipe Page Screenshot"
+                    alt="Palapia Recipe Details - View complete recipe instructions and cooking steps"
                     className="w-auto h-[400px] max-h-[400px] rounded-[2.5rem] shadow-2xl"
+                    width={300}
+                    height={400}
+                    loading="lazy"
                   />
               </div>
             </motion.div>
@@ -614,6 +665,8 @@ export default function PalapiaLanding() {
                   src="/assets/headerlogo.png" 
                   alt="Palapia Logo"
                   className="h-8"
+                  width={120}
+                  height={32}
                 />
               </div>
               <p className="text-sm opacity-70 mb-4">
@@ -668,6 +721,7 @@ export default function PalapiaLanding() {
         </div>
       </footer>
     </div>
+    </>
   )
 }
 
